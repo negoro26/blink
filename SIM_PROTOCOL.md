@@ -18,6 +18,10 @@ messages and point `robot_mcp` at the socket (`BLINK_HOST`, `BLINK_PORT`).
   `t_target`, it answers at its current time and reports `late_s = t_sim - t_target`.
 - The sim never pauses for the brain and never runs ahead of the wall mapping by more than one control step, so the
   site experiences exactly the brain's real latency, whatever the sim's real-time factor.
+- A request that arrives before the event, or without an integer `t_wall_ns`, has no `t_target`: the sim applies and
+  answers it at its next control step, at its current time, with `late_s` 0. The mapping is fixed on arrival, so it
+  stays unmapped even if the event fires before that step. Before the event nothing ties the sim's pace to the wall
+  clock.
 
 ## The site
 One vehicle (`vehicles[0]`, e.g. `forklift`) drives a fixed sim-time schedule. People stand where the scenario puts
@@ -31,7 +35,8 @@ Sim to client (unsolicited):
   which the vehicle moves at 1 m/s on a schedule that meets the robot or a person. `time_to_contact_s` is the earliest
   predicted contact from the schedules; `state` is the `site_get_state` reply at that instant.
 - `{"type":"outcome","t_sim":...,"collision":bool,"t_contact":...,"min_gap_m":...,"max_force_n":...,"people":{"worker1":{"hit":bool,"t_contact":...|null,"min_gap_m":...}}}`
-  once the vehicle has stopped: the robot's physical contact verdict, and each person's geometric one.
+  once the vehicle has stopped: the robot's physical contact verdict, and each person's geometric one. The run's
+  verdict is `hit` when any person is hit, else `saved`; in a scenario with no people, `hit` when the robot collided.
 
 Client to sim (requests, each with `id`, `op`, `t_wall_ns`) and replies (each with `late_s`):
 - `site_get_state` -> `{"t_sim", "vehicles": [{"id","x","y","yaw","speed_mps","reversing","estop","estop_available","stops_at_t_sim"}], "people": [{"id","x","y","yaw","speed_mps","time_to_contact_s","reaction_s","alerted","safe"}], "robot": {"id","x","y","yaw","vx","vy","time_to_contact_s"}}`.

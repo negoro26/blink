@@ -1,6 +1,6 @@
 """The laptop driver of Blink: hands the sim's hazard event to the OpenClaw agent `blink` and times every step.
 
-    python3 scripts/claw/drive.py gate --brain kimi --effort max --event <a live run's event JSON> --repeat 5
+    python3 scripts/claw/drive.py gate --brain kimi --effort max --event demo/events/worker.json --repeat 5
     python3 scripts/claw/drive.py live --brain gpu --effort on --session <sim-runner run name>
 
 Brains (BRAINS): `kimi` (Kimi K3.1 Pro on Cerebras), `qwen` (Qwen 3.8 27B on Cerebras, the stand-in before Kimi
@@ -358,6 +358,13 @@ def openclaw_target(*target):
     subprocess.run([str(HERE / "openclaw.sh"), "target", *target], check=True, stdout=subprocess.DEVNULL)
 
 
+def verdict(outcome):
+    """SIM_PROTOCOL.md's run verdict from the outcome message: hit or saved."""
+    people = outcome["people"].values()
+    hit = any(p["hit"] for p in people) if people else outcome["collision"]
+    return "hit" if hit else "saved"
+
+
 def episode(brain, event, t_recv, calls_from, tools, offset):
     """One event's numbers: L from the MCP log, the decision, the first model call's tokens and speed."""
     ev_ns = event["t_wall_ns"]
@@ -497,9 +504,7 @@ def main():
         "session": args.session,
         "reaction_ms": round(statistics.median(ls) * 1000) if ls else None,
         "tokens_per_s": first.get("tokens_per_s"),
-        "outcome": None
-        if outcome is None
-        else ("hit" if any(p["hit"] for p in outcome["people"].values()) else "saved"),
+        "outcome": None if outcome is None else verdict(outcome),
         "outcome_msg": outcome,
         "l_s": ls,
         "l_median_s": round(statistics.median(ls), 4) if ls else None,
