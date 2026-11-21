@@ -1,6 +1,6 @@
 """The laptop driver of Blink: hands the sim's hazard event to the OpenClaw agent `blink` and times every step.
 
-    python3 scripts/claw/drive.py gate --brain kimi --effort max --event demo/events/wh1.json --repeat 5
+    python3 scripts/claw/drive.py gate --brain kimi --effort max --event <a live run's event JSON> --repeat 5
     python3 scripts/claw/drive.py live --brain gpu --effort on --session <sim-runner run name>
 
 Brains (BRAINS): `kimi` (Kimi K3.1 Pro on Cerebras), `qwen` (Qwen 3.8 27B on Cerebras, the stand-in before Kimi
@@ -21,9 +21,9 @@ outcome arrive on it. `gate` runs robot_mcp.replay on gpu-host with --event (a r
 fills the provider's prompt cache, as a robot's brain is up before its hazard.
 
 The MCP server's log (robot_mcp/server.py, gpu-host's clock) gives each tool call's request t_wall_ns and the sim's
-reply (applied_at_t_sim, late_s); L is the first robot_evade or site_estop request's t_wall_ns minus the event's,
-both read on gpu-host's clock. Tap times are this laptop's, shifted onto gpu-host's by an offset measured over one ssh
-connection (min-RTT sample).
+reply (applied_at_t_sim, late_s); L is the first action's (ACTIONS) request t_wall_ns minus the event's, both read on
+gpu-host's clock. Tap times are this laptop's, shifted onto gpu-host's by an offset measured over one ssh connection
+(min-RTT sample).
 
 Writes demo/results/<run>.json: compose_split.sh's keys (run, model, reaction_ms, tokens_per_s, outcome), the event,
 the outcome, every tool call, every model call with its token stream, and the agent's final text.
@@ -65,10 +65,10 @@ BRAINS = {
     "qwen": {"provider": "blinkcerebras", "model": "qwen-3.8-27b", "label": "Qwen 3.8 27B on Cerebras"},
     "gpu": {"provider": "blinkvllm", "model": "qwen-27b", "label": "Qwen3.8-27B fine-tune on GPU (vLLM)"},
 }
-ACTIONS = {"robot_evade", "site_estop"}
+ACTIONS = {"site_estop", "site_alert", "robot_dispatch"}
 """The tool calls that act on the hazard: the first one's request ends L."""
 EVENT_PROMPT = "EVENT {}"
-WARMUP = "Warm-up, no hazard: call robot_get_state once, then answer only OK."
+WARMUP = "Warm-up, no hazard: call site_get_state once, then answer only OK."
 
 
 def now():
@@ -458,7 +458,7 @@ def main():
         if event is None:
             sys.exit("drive.py: no event")
         calls_from = len(Tap.calls)
-        payload = event.get("state") or {k: v for k, v in event.items() if k not in {"type", "t_wall_ns"}}
+        payload = {k: v for k, v in event.items() if k not in {"type", "t_wall_ns"}}
         turn = ask(args.brain, EVENT_PROMPT.format(json.dumps(payload, separators=(",", ":"))))
         turn["calls_from"] = calls_from
         turns.append((turn, event, t_recv))
@@ -497,7 +497,9 @@ def main():
         "session": args.session,
         "reaction_ms": round(statistics.median(ls) * 1000) if ls else None,
         "tokens_per_s": first.get("tokens_per_s"),
-        "outcome": None if outcome is None else ("hit" if outcome.get("collision") else "escaped"),
+        "outcome": None
+        if outcome is None
+        else ("hit" if any(p["hit"] for p in outcome["people"].values()) else "saved"),
         "outcome_msg": outcome,
         "l_s": ls,
         "l_median_s": round(statistics.median(ls), 4) if ls else None,
@@ -513,7 +515,7 @@ def main():
         result["event"] = turns[0][1]
     out = REPO / "demo/results" / f"{run}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(result, indent=1))
+    out.write_text(json.dumps(result, indent=1) + "\n")
     for e in episodes:
         print(
             f"L {e['l_s']} s  decision {e['decision']}  ttft {e['ttft_s']}  tokens {e['completion_tokens']} "

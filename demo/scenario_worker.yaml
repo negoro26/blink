@@ -1,0 +1,45 @@
+# Blink's site-safety scene in warehouse1 (NVIDIA's Simple_Warehouse) for ANYmal-D under run_legged: a
+# worker picks at rack row 4's bay near the aisle's south end, his side to the aisle, while a forklift reverses down
+# the aisle at walking pace, counterweight first, with no view behind it. ANYmal-D stands in the aisle's west half.
+# The site supervisor (OpenClaw + Kimi, robot_mcp) can brake the forklift (site_estop), alert the worker
+# (site_alert: he steps out of the aisle's east half `reaction_s` later) and dispatch the robot (robot_dispatch).
+# Laid over scenario_warehouse.yaml (its hall, racks, forklift asset, cameras); read by `run_legged.py --scenario`.
+#
+# Frame: warehouse1's world frame, as in scenario_warehouse.yaml (origin at the hall's (-12.4, 3.0), x east, y north).
+# The forklift's swept band is world x -0.214..1.000; the worker's disc (r 0.28) at x 0.39 is inside it, his escape
+# point at x -0.9 is 0.41 m clear of it. The robot at x -1.4 is outside it.
+#
+# The schedule: the forklift leaves at t_go 60.0 and reaches 1.0 m/s 1.0 s later, when the sim raises the event; its
+# counterweight (y 19.25 at the start) then has 12.0 m to the worker's disc (y 6.78): contact about 12 s after the
+# event with no action. An e-stop brakes it at 4.0 m/s^2 (0.125 m from 1.0 m/s).
+
+include: scenario_warehouse.yaml
+
+robot_start: [-1.4, 9.5, -1.5707963]  # the aisle's west half, 3 m north of the worker, facing south toward him
+
+car:
+  id: forklift
+  start: [0.393, 21.0, 1.5707963]  # forks north, at the aisle's north end
+  reverse: true
+  t_go: 60.0
+  accel_mps2: 1.0
+  speed_mps: 1.0       # 3.6 km/h, reversing in a pedestrian aisle
+  brake_mps2: 1.0
+  stop_after_m: 14.0   # past the worker's bay, out of the aisle's south end
+
+site_estop: true  # the forklift is on the site's safety network
+
+people:
+  - id: worker1
+    start: [0.39, 6.5, 0.0]  # facing east into row 4's bay, the forklift behind his left shoulder
+    escape: [-0.9, 6.5]      # where he steps to when alerted: the aisle's west half
+    speed_mps: 1.4
+    reaction_s: 1.5          # from the alert (wearable buzzer and voice) to his first step
+    radius_m: 0.28           # worker.usda's collider capsule
+
+chase:  # world-fixed CCTV south of the rack ends, looking up the aisle: the worker, the robot, the forklift
+  eye: [-0.8, 3.2, 2.4]
+  target: [0.3, 11.0, 0.8]
+  hfov_deg: 70.0
+  width: 1920
+  height: 1080

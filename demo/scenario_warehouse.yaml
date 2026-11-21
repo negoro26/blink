@@ -40,7 +40,7 @@ site_estop: false  # this forklift has no networked e-stop: the robot itself mus
 
 robots:
   anymal_d:
-    clear_motion: left at vy 1.0 m/s (the protocol's evade left)
+    clear_motion: left at vy 1.0 m/s (a /cmd_vel sidestep)
     clear_distance_m: 1.03  # the robot's right side (0.265 m from the base) out of the forklift's band plus 5 cm
     clear_time_s: 1.36      # measured: run 20261121-165609-wh-clear2 (1.36, 1.34 s)
     window_s: 2.36          # clear_time_s + 1.0: the EVENT-to-contact time the start and schedule are set for
