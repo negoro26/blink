@@ -21,8 +21,8 @@ REPO="$PWD"
 CONF="$HOME/.config/blink"
 TOKEN_FILE="$CONF/gateway.token"
 WORKSPACE="$HOME/.openclaw/workspace-blink"
-oc() {
-    (cd "$HOME/Projects/hackathon" && mise exec -- openclaw "$@")
+oc() {  # a running gateway needs its token for config and MCP commands
+    (cd "$HOME/Projects/hackathon" && OPENCLAW_GATEWAY_TOKEN="$(cat "$TOKEN_FILE" 2>/dev/null)" mise exec -- openclaw "$@")
 }
 
 case "${1:-}" in
@@ -40,6 +40,7 @@ case "${1:-}" in
     "auth": {"mode": "token", "token": {"source": "env", "provider": "default", "id": "OPENCLAW_GATEWAY_TOKEN"}},
     "http": {"endpoints": {"chatCompletions": {"enabled": true}}}
   },
+  "tools": {"toolSearch": {"mode": "tools", "exclude": [{"source": "mcp", "name": "robot__*"}]}},
   "mcp": {"servers": {
     "go2": null,
     "robot": {"command": "$REPO/scripts/claw/box_cmd.sh", "args": [], "connectionTimeoutMs": 60000, "requestTimeoutMs": 120000}
