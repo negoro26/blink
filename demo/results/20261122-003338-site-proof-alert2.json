@@ -1,0 +1,94 @@
+{
+  "run": "20261122-003338-site-proof-alert2",
+  "mode": "proof",
+  "model": "scripted site_alert at L = 2 s",
+  "reaction_ms": 2000,
+  "outcome": "saved",
+  "l_s": 2.000120164,
+  "event": {
+    "type": "event",
+    "t_sim": 121.0,
+    "t_wall_ns": 1795300733097740621,
+    "time_to_contact_s": 11.975,
+    "person": "worker1",
+    "alert_deadline_t_sim": 130.975,
+    "estop_deadline_t_sim": 132.845,
+    "deadline_t_sim": 132.845,
+    "deadline_s": 11.845,
+    "state": {
+      "t_sim": 121.0,
+      "vehicles": [
+        {
+          "id": "forklift",
+          "x": 0.393,
+          "y": 20.5,
+          "yaw": 1.571,
+          "speed_mps": 1.0,
+          "reversing": true,
+          "estop": false,
+          "estop_available": true,
+          "stops_at_t_sim": 135.0
+        }
+      ],
+      "people": [
+        {
+          "id": "worker1",
+          "x": 0.39,
+          "y": 6.5,
+          "yaw": 0.0,
+          "speed_mps": 0.0,
+          "time_to_contact_s": 11.975,
+          "alert_deadline_s": 9.975,
+          "estop_deadline_s": 11.845,
+          "reaction_s": 1.5,
+          "alerted": false,
+          "safe": false
+        }
+      ],
+      "robot": {
+        "id": "anymal_d",
+        "x": -1.433,
+        "y": 9.526,
+        "yaw": -1.53,
+        "vx": -0.0,
+        "vy": 0.015,
+        "time_to_contact_s": null
+      }
+    }
+  },
+  "calls": [
+    {
+      "request": {
+        "id": 1,
+        "op": "site_alert",
+        "person": "worker1",
+        "message": "Forklift reversing toward you, step out of the aisle now",
+        "t_wall_ns": 1795300735097860785
+      },
+      "reply": {
+        "id": 1,
+        "person": "worker1",
+        "applied_at_t_sim": 123.02,
+        "reaction_s": 1.5,
+        "moves_at_t_sim": 124.52,
+        "late_s": 0.0199
+      },
+      "l_s": 2.000120164
+    }
+  ],
+  "outcome_msg": {
+    "type": "outcome",
+    "t_sim": 135.0,
+    "collision": false,
+    "t_contact": null,
+    "max_force_n": 0.0,
+    "min_gap_m": 1.211,
+    "people": {
+      "worker1": {
+        "hit": false,
+        "t_contact": null,
+        "min_gap_m": 0.406
+      }
+    }
+  }
+}

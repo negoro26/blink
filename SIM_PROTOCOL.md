@@ -31,16 +31,20 @@ verdict is geometric, from the two schedules, judged every physics step. Poses a
 
 ## Messages
 Sim to client (unsolicited):
-- `{"type":"event","t_sim":61.0,"t_wall_ns":...,"time_to_contact_s":11.98,"state":{...}}`: the first policy step at
-  which the vehicle moves at 1 m/s on a schedule that meets the robot or a person. `time_to_contact_s` is the earliest
-  predicted contact from the schedules; `state` is the `site_get_state` reply at that instant.
+- `{"type":"event","t_sim":121.0,"t_wall_ns":...,"time_to_contact_s":11.975,"person":"worker1","alert_deadline_t_sim":130.975,"estop_deadline_t_sim":132.845,"deadline_t_sim":132.845,"deadline_s":11.845,"state":{...}}`:
+  the first policy step at which the vehicle moves at 1 m/s on a schedule that meets the robot or a person.
+  `time_to_contact_s` is the earliest predicted contact from the schedules. For the person it meets first, the
+  deadlines are the last sim time at which an alert alone, or an e-stop alone, still keeps the vehicle off him (from
+  the same schedules and geometry, on the 5 ms physics grid), and `deadline_t_sim` the later of the two (null: that
+  action cannot save him). `state` is the `site_get_state` reply at that instant.
 - `{"type":"outcome","t_sim":...,"collision":bool,"t_contact":...,"min_gap_m":...,"max_force_n":...,"people":{"worker1":{"hit":bool,"t_contact":...|null,"min_gap_m":...}}}`
   once the vehicle has stopped: the robot's physical contact verdict, and each person's geometric one. The run's
   verdict is `hit` when any person is hit, else `saved`; in a scenario with no people, `hit` when the robot collided.
 
 Client to sim (requests, each with `id`, `op`, `t_wall_ns`) and replies (each with `late_s`):
-- `site_get_state` -> `{"t_sim", "vehicles": [{"id","x","y","yaw","speed_mps","reversing","estop","estop_available","stops_at_t_sim"}], "people": [{"id","x","y","yaw","speed_mps","time_to_contact_s","reaction_s","alerted","safe"}], "robot": {"id","x","y","yaw","vx","vy","time_to_contact_s"}}`.
-  Contact times are recomputed from the schedules as they are now (after any e-stop or alert); null: none predicted.
+- `site_get_state` -> `{"t_sim", "vehicles": [{"id","x","y","yaw","speed_mps","reversing","estop","estop_available","stops_at_t_sim"}], "people": [{"id","x","y","yaw","speed_mps","time_to_contact_s","alert_deadline_s","estop_deadline_s","reaction_s","alerted","safe"}], "robot": {"id","x","y","yaw","vx","vy","time_to_contact_s"}}`.
+  Contact times and deadlines (seconds from now) are recomputed from the schedules as they are now (after any e-stop
+  or alert); null: none predicted, or that action can no longer save the person, or it has been used.
 - `site_camera`, `name`: `chase` (a fixed CCTV view) or `front` (the robot's) -> `{"t_sim","camera","jpeg_b64"}`, 640x360
   JPEG, rendered at that step on request (no periodic rendering).
 - `site_estop`, `vehicle` -> `{"vehicle","applied_at_t_sim","stops_at_t_sim"}`: the site's safety network brakes the
