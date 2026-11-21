@@ -20,7 +20,8 @@
   "reflex": {"latency_s": 0.1, "margin_m": 0.4},
   "record": {"pre": 3.0, "post": 3.0, "fps": 30},
   "look": {"film_iso": 100, "recipe": true, "fog": true, "dome": 150, "highbay_intensity": 12000, "highbay_z": 8.3,
-           "highbay_xy": [[-24, -2], [-16, -2], [-24, 10], [-16, 10], [-24, 22], [-16, 22], [-8, 10], [-8, -2]]},
+           "highbay_xy": [[-24, -2], [-16, -2], [-24, 10], [-16, 10], [-24, 22], [-16, 22], [-8, 10], [-8, -2]],
+           "motion_blur": true, "motion_blur_exposure_fraction": 0.375, "motion_blur_diameter_fraction": 0.025, "motion_blur_samples": 8},
   "workers": [
     {"path": [[-27.0, -0.5, 0.0], [-10.0, -0.5, 0.0]], "speed": 1.2,
      "asset": "Isaac/People/Characters/male_adult_construction_01_new/male_adult_construction_01_new.usd"},
@@ -30,7 +31,9 @@
      "asset": "Isaac/People/Characters/male_adult_construction_03/male_adult_construction_03.usd"}
   ],
   "cameras": {
-    "chase": {"eye": [-16.6, 15.5, 1.5], "target": [-18.4, 10.3, 0.9], "focal": 14.0, "res": [1920, 1080]},
+    "chase": {"eye": [-16.0, 15.0, 3.0], "target": [-18.8, 10.8, 0.8], "focal": 8.8, "res": [1920, 1080],
+              "opencv_pinhole": {"fx_scale": 805.8, "fy_over_fx": 0.94, "coefficients": {"k1": -0.03, "k2": 0.008, "k3": 0.0, "p1": 0.0, "p2": 0.0}}},
     "mast": {"offset": [0.38, 0.0, 0.32], "pitch_deg": 6.0, "focal": 12.0, "res": [1280, 720]}
-  }
+  },
+  "cctv": {"label": "CAM03 - AISLE", "timestamp_start": "2026-11-21 18:40:00.000"}
 }

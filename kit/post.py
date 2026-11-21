@@ -16,6 +16,7 @@ frames = [json.loads(line) for line in open(os.path.join(run, "frames.jsonl"))]
 out = json.load(open(os.path.join(run, "outcome.json")))
 t_ev = out["t_event"]
 ff = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", "30"]
+grade = {"chase": "noise=alls=5:allf=t+u:all_seed=7,eq=contrast=0.94:brightness=0.02:saturation=0.90"}
 for cam in ("chase", "mast"):
     subprocess.run(
         [
@@ -24,6 +25,7 @@ for cam in ("chase", "mast"):
             f"{run}/{cam}/%05d.png",
             "-c:v",
             "libx264",
+            *(["-vf", grade[cam]] if cam in grade else []),
             "-pix_fmt",
             "yuv420p",
             "-crf",
@@ -42,7 +44,7 @@ subprocess.run(
         "-i",
         f"{run}/mast/%05d.png",
         "-filter_complex",
-        "[1:v]scale=640:360,pad=648:368:4:4:white[m];[0:v][m]overlay=W-w-24:24",
+        "[0:v]" + grade["chase"] + "[base];[1:v]scale=640:360,pad=648:368:4:4:white[m];[base][m]overlay=W-w-24:24",
         "-c:v",
         "libx264",
         "-pix_fmt",

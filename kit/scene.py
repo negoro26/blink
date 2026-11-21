@@ -11,6 +11,7 @@ Usage (Isaac Sim python): scene.py --out RUN_DIR [--serve] [--record] [--port 47
 """
 
 import argparse
+import datetime
 import json
 import math
 import os
@@ -56,6 +57,7 @@ app = SimulationApp(
         "height": 1080,
         "renderer": "RayTracedLighting",
         "active_cuda_gpus": [0],
+        "/renderer/raytracingMotion/enabled": True,
         "multi_gpu": False,
     }
 )
@@ -89,8 +91,8 @@ from isaacsim.core.simulation_manager.impl.isaac_events import IsaacEvents
 from isaacsim.robot.policy.examples import RobotPolicyRunner, get_anymal_spec
 from isaacsim.storage.native import get_assets_root_path
 from omni.physx import get_physx_interface, get_physx_scene_query_interface, get_physx_simulation_interface
-from PIL import Image
-from pxr import Gf, PhysicsSchemaTools, PhysxSchema, Usd, UsdGeom, UsdPhysics, UsdShade
+from PIL import Image, ImageDraw, ImageFont
+from pxr import Gf, PhysicsSchemaTools, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
 
 ROOT = get_assets_root_path()
 DT = float(SHOT["physics_dt"])
@@ -176,6 +178,17 @@ s.set("/rtx/post/tonemap/filmIso", float(L["film_iso"]))
 s.set("/rtx/post/tonemap/whitepoint", 6500.0)
 s.set("/rtx/post/tonemap/enabled", True)
 s.set("/rtx/post/aa/op", int(L.get("aa_op", 3)))
+s.set("/renderer/raytracingMotion/enabled", True)
+s.set("/rtx/post/motionblur/enabled", bool(L.get("motion_blur", False)))
+s.set("/rtx/post/motionblur/exposureFraction", float(L.get("motion_blur_exposure_fraction", 0.375)))
+s.set("/rtx/post/motionblur/maxBlurDiameterFraction", float(L.get("motion_blur_diameter_fraction", 0.025)))
+s.set("/rtx/post/motionblur/numSamples", int(L.get("motion_blur_samples", 8)))
+log(
+    "look mode=RT2+ACES "
+    f"motion_blur={L.get('motion_blur', False)} motion_bvh={s.get('/renderer/raytracingMotion/enabled')} "
+    f"exposure_fraction={s.get('/rtx/post/motionblur/exposureFraction')} "
+    f"diameter_fraction={s.get('/rtx/post/motionblur/maxBlurDiameterFraction')}"
+)
 if L.get("recipe", True):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from warehouse_lighting import add_warehouse_lighting
@@ -352,12 +365,23 @@ _cb = SimulationManager.register_callback(on_post_physics, IsaacEvents.POST_PHYS
 C = SHOT["cameras"]
 
 
-def make_cam(path, focal):
+def make_cam(path, cfg):
     c = UsdGeom.Camera.Define(stage, path)
-    c.CreateFocalLengthAttr(float(focal))
+    c.CreateFocalLengthAttr(float(cfg["focal"]))
     c.CreateClippingRangeAttr(Gf.Vec2f(0.05, 500.0))
     xf = UsdGeom.Xformable(c.GetPrim())
     xf.ClearXformOpOrder()
+    lens = cfg.get("opencv_pinhole")
+    if lens:
+        w, h = cfg["res"]
+        fx = float(lens.get("fx_scale", w))
+        fy = fx * float(lens.get("fy_over_fx", 1.0))
+        c.GetPrim().ApplyAPI("OmniLensDistortionOpenCvPinholeAPI")
+        ns = "omni:lensdistortion:opencvPinhole"
+        for name, value in {"fx": fx, "fy": fy, "cx": w / 2, "cy": h / 2, **lens["coefficients"]}.items():
+            c.GetPrim().CreateAttribute(f"{ns}:{name}", Sdf.ValueTypeNames.Float, custom=False).Set(float(value))
+        c.GetPrim().CreateAttribute(f"{ns}:imageSize", Sdf.ValueTypeNames.Int2, custom=False).Set(Gf.Vec2i(w, h))
+        log(f"lens path={path} fx={fx:.2f} fy={fy:.2f} hfov_deg={math.degrees(2 * math.atan(w / (2 * fx))):.2f}")
     return xf.AddTransformOp()
 
 
@@ -365,9 +389,9 @@ def look(op, eye, target):
     op.Set(Gf.Matrix4d().SetLookAt(Gf.Vec3d(*eye), Gf.Vec3d(*target), Gf.Vec3d(0, 0, 1)).GetInverse())
 
 
-chase_op = make_cam("/World/Blink/ChaseCam", C["chase"]["focal"])
+chase_op = make_cam("/World/Blink/ChaseCam", C["chase"])
 look(chase_op, C["chase"]["eye"], C["chase"]["target"])
-mast_op = make_cam("/World/Blink/MastCam", C["mast"]["focal"])
+mast_op = make_cam("/World/Blink/MastCam", C["mast"])
 want_chase = args.record or bool(args.stills)
 rp_mast = rep.create.render_product("/World/Blink/MastCam", tuple(C["mast"]["res"]))
 ann_mast = rep.AnnotatorRegistry.get_annotator("rgb")
@@ -379,6 +403,25 @@ if want_chase:
 rep.orchestrator.set_capture_on_play(False)
 for _ in range(60 if want_chase else 5):
     app.update()
+
+CCTV = SHOT["cctv"]
+CCTV_T0 = datetime.datetime.fromisoformat(CCTV["timestamp_start"])
+try:
+    CCTV_FONT = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 24)
+except OSError:
+    CCTV_FONT = ImageFont.load_default(size=24)
+
+
+def save_chase(a, k, t):
+    im = Image.fromarray(a)
+    stamp = (CCTV_T0 + datetime.timedelta(seconds=t)).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    d = ImageDraw.Draw(im)
+    text = f"REC  {CCTV['label']}    {stamp}"
+    box = d.textbbox((0, 0), text, font=CCTV_FONT)
+    d.rectangle((18, 18, box[2] + 34, box[3] + 34), fill=(0, 0, 0))
+    d.text((26, 26), text, fill=(220, 245, 220), font=CCTV_FONT)
+    im.save(f"{OUT}/chase/{k:05d}.png", compress_level=1)
+
 
 # ---------------------------------------------------------------- start physics; from here the loop owns every physics step
 timeline = omni.timeline.get_timeline_interface()
@@ -808,7 +851,7 @@ def maybe_frame():
             k = ST["frame"]
             ST["frame"] += 1
             a, m = ann_chase.get_data()[:, :, :3].copy(), ann_mast.get_data()[:, :, :3].copy()
-            pool.submit(lambda a=a, k=k: Image.fromarray(a).save(f"{OUT}/chase/{k:05d}.png", compress_level=1))
+            pool.submit(save_chase, a, k, t_sim)
             pool.submit(lambda m=m, k=k: Image.fromarray(m).save(f"{OUT}/mast/{k:05d}.png", compress_level=1))
             FR_IDX.write(json.dumps({"i": k, "t_sim": round(t_sim, 4)}) + "\n")
     elif STILLS and t_sim >= STILLS[0] - 1e-9:
