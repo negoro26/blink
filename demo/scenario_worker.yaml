@@ -9,9 +9,11 @@
 # The forklift's swept band is world x -0.214..1.000; the worker's disc (r 0.28) at x 0.39 is inside it, his escape
 # point at x -0.9 is 0.41 m clear of it. The robot at x -1.4 is outside it.
 #
-# The schedule: the forklift leaves at t_go 60.0 and reaches 1.0 m/s 1.0 s later, when the sim raises the event; its
-# counterweight (y 19.25 at the start) then has 12.0 m to the worker's disc (y 6.78): contact about 12 s after the
-# event with no action. An e-stop brakes it at 4.0 m/s^2 (0.125 m from 1.0 m/s).
+# The schedule: the forklift leaves at t_go 120.0 (a minute of wall time after the sim starts, at its 2x real time,
+# for the brain's warm-up turn) and reaches 1.0 m/s 1.0 s later, when the sim raises the event; its counterweight
+# (y 19.25 at the start) then has 12.0 m to the worker's disc (y 6.78): contact 11.975 s after the event with no
+# action. The last alert that saves him comes 9.975 s after the event (1.5 s reaction, 0.9 m to leave the lane at
+# 1.4 m/s); the last e-stop 11.845 s after it (it brakes at 4.0 m/s^2, 0.125 m from 1.0 m/s).
 
 include: scenario_warehouse.yaml
 
@@ -21,7 +23,7 @@ car:
   id: forklift
   start: [0.393, 21.0, 1.5707963]  # forks north, at the aisle's north end
   reverse: true
-  t_go: 60.0
+  t_go: 120.0
   accel_mps2: 1.0
   speed_mps: 1.0       # 3.6 km/h, reversing in a pedestrian aisle
   brake_mps2: 1.0
@@ -36,6 +38,10 @@ people:
     speed_mps: 1.4
     reaction_s: 1.5          # from the alert (wearable buzzer and voice) to his first step
     radius_m: 0.28           # worker.usda's collider capsule
+    usd: worker.usda         # demo/build_worker.py (feat/humanoid) under $CLAW_ASSETS: seen by the cameras, never contact
+    sha256:
+      worker.usda: 8bae9394458820186cd6f88a51e3a635dbb35efbfa3c4a47334b1a7773f3b661
+      worker_posed.usda: b1fdbb0a40a425633ca71cfc86c9f5fc32cddccc86491de799b58f180f3a001e
 
 chase:  # world-fixed CCTV south of the rack ends, looking up the aisle: the worker, the robot, the forklift
   eye: [-0.8, 3.2, 2.4]
