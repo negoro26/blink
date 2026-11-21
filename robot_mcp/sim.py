@@ -1,15 +1,17 @@
 """A client of the Blink sim protocol (SIM_PROTOCOL.md), stdlib only, and its command line.
 
     python3 -m robot_mcp.sim events                       # print every event and outcome line, then exit
-    python3 -m robot_mcp.sim proof --at 0.3 [--direction left] [--duration-ms 1500]
-    python3 -m robot_mcp.sim call get_state               # one request, its reply on stdout
+    python3 -m robot_mcp.sim proof '{"at": 1.0, "op": "site_estop", "vehicle": "forklift"}' ...
+    python3 -m robot_mcp.sim proof --file calls.jsonl      # one such request per line
+    python3 -m robot_mcp.sim call site_get_state          # one request, its reply on stdout
 
 The sim listens on $BLINK_HOST:$BLINK_PORT (default 127.0.0.1:47800), on the sim's host and inside its box: run
 this there (scripts/claw/box_cmd.sh enters a live session's box). Every request carries the client's CLOCK_REALTIME
 `t_wall_ns` at send time, so the sim maps it onto its own clock (the catch-up rule).
 
-`proof` is the scripted brain of the catch-up rule's check: it waits for the event, then sends one evade so that its
-t_wall_ns is the event's plus --at seconds, and prints the reply and the outcome as JSON lines.
+`proof` is a scripted brain: it waits for the event, sends each request (its op and fields) so that its t_wall_ns
+is the event's plus its `at` seconds, without waiting for earlier replies, and prints every request with its reply,
+then the outcome, as JSON lines. No request is the no-brain run.
 """
 
 import argparse
@@ -19,6 +21,7 @@ import socket
 import sys
 import threading
 import time
+from operator import itemgetter
 
 
 class Sim:
@@ -106,10 +109,9 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("events", help="print the event and outcome lines, exit after the outcome")
     sub.add_parser("relay", help="send each stdin line (a request without t_wall_ns) and print every message")
-    proof = sub.add_parser("proof", help="evade at --at s after the event, print the reply and the outcome")
-    proof.add_argument("--at", type=float, required=True, help="seconds after the event's t_wall_ns")
-    proof.add_argument("--direction", default="left")
-    proof.add_argument("--duration-ms", type=int, default=1500)
+    proof = sub.add_parser("proof", help="send timed requests after the event, print the replies and the outcome")
+    proof.add_argument("requests", nargs="*", help='JSON objects {"at": s after the event, "op": ..., fields...}')
+    proof.add_argument("--file", help="more such objects, one per line")
     call = sub.add_parser("call", help="one request: op and key=value fields (numbers parsed as JSON)")
     call.add_argument("op")
     call.add_argument("fields", nargs="*")
@@ -142,11 +144,19 @@ def main():
     if event is None:
         sys.exit("sim.py: the sim closed before its event")
     emit({"event": event, "t_recv_ns": time.time_ns()})
-    at_ns = event["t_wall_ns"] + int(args.at * 1e9)
-    while (left := at_ns - time.time_ns()) > 0:
-        time.sleep(min(left / 1e9, 0.05) if left > 2_000_000 else 0)
-    req, reply = sim.request("evade", direction=args.direction, duration_ms=args.duration_ms)
-    emit({"request": req, "reply": reply, "l_s": (req["t_wall_ns"] - event["t_wall_ns"]) / 1e9})
+    script = [json.loads(r) for r in args.requests]
+    if args.file:
+        with open(args.file, encoding="utf-8") as f:
+            script += [json.loads(line) for line in f if line.strip()]
+    sent = []
+    for item in sorted(script, key=itemgetter("at")):
+        fields = {k: v for k, v in item.items() if k not in {"at", "op"}}
+        at_ns = event["t_wall_ns"] + int(item["at"] * 1e9)
+        while (left := at_ns - time.time_ns()) > 0:
+            time.sleep(min(left / 1e9, 0.05) if left > 2_000_000 else 0)
+        sent.append(sim.send(item["op"], **fields))
+    for rid, req in sent:
+        emit({"request": req, "reply": sim.wait(rid), "l_s": (req["t_wall_ns"] - event["t_wall_ns"]) / 1e9})
     outcome = sim.wait_for("outcome")
     emit({"outcome": outcome})
     return 0

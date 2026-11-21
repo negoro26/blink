@@ -1,12 +1,11 @@
-"""Blink's MCP server: five tools over stdio, each a thin client of the sim protocol (SIM_PROTOCOL.md, robot_mcp/sim.py).
+"""Blink's MCP server: six tools over stdio, each a thin client of the sim protocol (SIM_PROTOCOL.md, robot_mcp/sim.py).
 
     python -m robot_mcp.server      # on the sim's host, in its network (scripts/claw/box_cmd.sh enters a session's box)
 
-robot_get_state  the sim's get_state reply: pose (world), velocity, the hazard and free space (robot frame)
-robot_set_goal   set_goal: walk to a world pose
-robot_evade      evade: 1.0 m/s along a direction of the robot frame for duration_ms (default 1500), then hold
-robot_snapshot   snapshot: the front camera, 640x360 JPEG
-site_estop       site_estop: the site's safety network brakes the hazard vehicle
+Each tool is the protocol op of its name: site_get_state (vehicles, people, robot, each with its predicted contact),
+site_camera (one named camera's frame, rendered on request), site_estop (the site's safety network brakes a vehicle),
+site_alert (a person's wearable alert), robot_dispatch (a robot walks to a world point), incident_report (the
+incident, into the sim's log).
 
 The same server drives any sim that serves the protocol (the Kit-less runner, the Kit scene) on $BLINK_HOST:$BLINK_PORT.
 Every call is one JSON line in $ROBOT_MCP_LOG (default $BOX_RUN/mcp.jsonl, else ./mcp.jsonl): the tool, its
@@ -53,56 +52,59 @@ class Link:
                     raise
         raise AssertionError
 
-    def call(self, tool, args, op, **fields):
-        """One tool call: the protocol request, logged; the reply without its id."""
+    def call(self, op, **args):
+        """One tool call (the protocol op of its name): the request, logged; the reply without its id."""
         wall_in = time.time_ns()
         try:
-            req, reply = self.request(op, **fields)
+            req, reply = self.request(op, **args)
         except (ConnectionError, OSError, TimeoutError) as e:
             req, reply = None, {"error": f"sim unreachable: {e}"}
         reply = {k: v for k, v in reply.items() if k != "id"}
         logged = {k: v for k, v in reply.items() if k != "jpeg_b64"}
-        record = {"tool": tool, "args": args, "wall_ns": wall_in, "t_wall_ns": req and req["t_wall_ns"]}
+        record = {"tool": op, "args": args, "wall_ns": wall_in, "t_wall_ns": req and req["t_wall_ns"]}
         self.log.write(json.dumps({**record, "reply": logged, "wall_ns_out": time.time_ns()}) + "\n")
         return reply
 
 
 def serve(link):
-    """Register the five tools and serve stdio until stdin closes."""
+    """Register the six tools and serve stdio until stdin closes."""
     mcp = MCPServer("robot")
 
-    async def call(tool, args, op, **fields):
-        return await asyncio.to_thread(link.call, tool, args, op, **fields)
+    async def call(op, **args):
+        return await asyncio.to_thread(link.call, op, **args)
 
     @mcp.tool(structured_output=False)
-    async def robot_get_state() -> str:
-        """The robot's state now. pose: world frame (m, rad). Robot frame (x forward, y left, m) for the rest: vel; hazard {kind, x, y, vx, vy, time_to_impact_s, exit_m: per direction the distance to move to leave its impact zone (0: outside, null: never), site_estop: whether site_estop works}; free_m: per direction the distance to the nearest static obstacle (null: none)."""
-        return json.dumps(await call("robot_get_state", {}, "get_state"))
+    async def site_get_state() -> str:
+        """Site now (world frame, m, s): vehicles, people, robot, each with time_to_contact_s (null: none predicted)."""
+        return json.dumps(await call("site_get_state"))
 
     @mcp.tool(structured_output=False)
-    async def robot_evade(direction: Literal["left", "right", "front", "back", "stop"], duration_ms: int = 1500) -> str:
-        """Move at once at 1.0 m/s along a direction of the robot frame for duration_ms, then hold; stop holds still. Returns when applied."""
-        args = {"direction": direction, "duration_ms": duration_ms}
-        return json.dumps(await call("robot_evade", args, "evade", **args))
-
-    @mcp.tool(structured_output=False)
-    async def robot_set_goal(x: float, y: float, yaw: float) -> str:
-        """Walk to a world-frame pose (m, rad), then hold it."""
-        args = {"x": x, "y": y, "yaw": yaw}
-        return json.dumps(await call("robot_set_goal", args, "set_goal", **args))
-
-    @mcp.tool(structured_output=False)
-    async def robot_snapshot() -> Image | str:
-        """The front camera's view now (640x360 JPEG)."""
-        reply = await call("robot_snapshot", {}, "snapshot")
+    async def site_camera(name: Literal["chase", "front"]) -> Image | str:
+        """A camera's view now: chase (CCTV up the aisle) or front (the robot's)."""
+        reply = await call("site_camera", name=name)
         if "jpeg_b64" not in reply:
             return json.dumps(reply)
         return Image(data=base64.b64decode(reply["jpeg_b64"]), format="jpeg")
 
     @mcp.tool(structured_output=False)
-    async def site_estop() -> str:
-        """The site's safety network brakes the hazard vehicle now. Returns when it will stop and its gap to the robot then."""
-        return json.dumps(await call("site_estop", {}, "site_estop"))
+    async def site_estop(vehicle: str) -> str:
+        """Brake a vehicle now (site safety network)."""
+        return json.dumps(await call("site_estop", vehicle=vehicle))
+
+    @mcp.tool(structured_output=False)
+    async def site_alert(person: str, message: str) -> str:
+        """Alert a person now (wearable buzzer and voice); they step clear after their reaction time."""
+        return json.dumps(await call("site_alert", person=person, message=message))
+
+    @mcp.tool(structured_output=False)
+    async def robot_dispatch(robot: str, x: float, y: float) -> str:
+        """Send a robot to walk to world (x, y)."""
+        return json.dumps(await call("robot_dispatch", robot=robot, x=x, y=y))
+
+    @mcp.tool(structured_output=False)
+    async def incident_report(text: str) -> str:
+        """File the incident report (what happened, actions, times, outcome)."""
+        return json.dumps(await call("incident_report", text=text))
 
     mcp.run("stdio")
 
