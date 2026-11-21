@@ -24,7 +24,7 @@
 
 Verdict: NO-GO at every effort. No effort passes, so the rule picks none. What limits L (measured): Cerebras queue_time
 0.01 to 10.1 s per call under hackathon load, OpenClaw's own time from the event to the model request 1.7 to 2.7 s,
-and 400 to 1,060 reasoning tokens at 260 to 420 tok/s even at effort low. Every decision was evade left, the right one.
+and 61 to 1,060 reasoning tokens per decision (low 61 to 415, max 511 to 1,060) at 260 to 420 tok/s. Every decision was evade left, the right one.
 
 ## Where L goes (measured 2026-11-21 21:25-21:50 EET)
 
