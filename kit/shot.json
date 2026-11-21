@@ -1,0 +1,36 @@
+{
+  "stage": "Isaac/Samples/Replicator/Incidents/full_warehouse_with_incident_tags.usd",
+  "seed": 7,
+  "physics_dt": 0.005,
+  "t_end_after_impact": 2.5,
+  "robot": {"start": [-19.27, 10.9, 0.7], "yaw_deg": -90.0, "half_len": 0.47, "half_wid": 0.29, "height": 0.8},
+  "pallets": [
+    {"pos": [-19.25, 9.52], "boxes": [["/World/full_warehouse/Box_3693", [0.0, 0.0]]]},
+    {"pos": [-19.25, 12.28], "boxes": [["/World/full_warehouse/Box_3695", [0.0, -0.25]], ["/World/full_warehouse/Box_3697", [0.0, 0.32]]]}
+  ],
+  "pallet_ref": "/World/full_warehouse/SM_PaletteA_1975",
+  "forklift": {"usd": "Isaac/Samples/AnimRobot/forklift.usd", "x": -20.37, "yaw_deg": 90.0, "rear": 0.885,
+               "front": 2.146, "half_w": 0.565, "y_rear_hit": 8.70, "t_event": 6.0, "reverse_d": 2.5,
+               "reverse_v": 2.0, "reverse_a": 2.5, "pull_out_s": 2.0, "pause_s": 0.6, "pull_out_d": 2.0},
+  "boxes": {"root": "/World/full_warehouse", "mass_big": 8.0, "mass_small": 2.0, "friction": 0.9,
+            "shelf_friction": 0.05, "shelves": ["/World/full_warehouse/SM_RackShelf_179"],
+            "shove": {"vx": [1.3, 1.7], "vy": [-0.15, 0.15], "vz": [0.3, 0.6], "w_deg": 60.0, "dir": [1.0, 0.0]}},
+  "zone": [-20.95, 8.3, -17.1, 13.25],
+  "t_impact_nobrain": 8.905,
+  "reflex": {"latency_s": 0.1, "margin_m": 0.4},
+  "record": {"pre": 3.0, "post": 3.0, "fps": 30},
+  "look": {"film_iso": 100, "recipe": true, "fog": true, "dome": 150, "highbay_intensity": 12000, "highbay_z": 8.3,
+           "highbay_xy": [[-24, -2], [-16, -2], [-24, 10], [-16, 10], [-24, 22], [-16, 22], [-8, 10], [-8, -2]]},
+  "workers": [
+    {"path": [[-27.0, -0.5, 0.0], [-10.0, -0.5, 0.0]], "speed": 1.2,
+     "asset": "Isaac/People/Characters/male_adult_construction_01_new/male_adult_construction_01_new.usd"},
+    {"path": [[-11.0, -2.5, 0.0], [-27.0, -2.5, 0.0]], "speed": 1.0,
+     "asset": "Isaac/People/Characters/male_adult_construction_05_new/male_adult_construction_05_new.usd"},
+    {"path": [[-13.0, 22.0, 0.0], [-13.0, 6.0, 0.0]], "speed": 1.1,
+     "asset": "Isaac/People/Characters/male_adult_construction_03/male_adult_construction_03.usd"}
+  ],
+  "cameras": {
+    "chase": {"eye": [-16.6, 15.5, 1.5], "target": [-18.4, 10.3, 0.9], "focal": 14.0, "res": [1920, 1080]},
+    "mast": {"offset": [0.38, 0.0, 0.32], "pitch_deg": 6.0, "focal": 12.0, "res": [1280, 720]}
+  }
+}
