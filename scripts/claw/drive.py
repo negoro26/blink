@@ -385,9 +385,14 @@ def episode(brain, event, t_recv, calls_from, tools, offset):
         "applied_at_t_sim": None if first is None else first["reply"].get("applied_at_t_sim"),
         "late_s": None if first is None else first["reply"].get("late_s"),
         "tool_calls": [
-            {**t, "t_from_event_s": round((t["t_wall_ns"] - ev_ns) / 1e9, 4) if t.get("t_wall_ns") else None}
+            {
+                **t,
+                "t_from_event_s": round((t["t_wall_ns"] - ev_ns) / 1e9, 4) if t.get("t_wall_ns") else None,
+                "duration_s": round((t["wall_ns_out"] - t["wall_ns"]) / 1e9, 4),
+            }
             for t in mine
         ],
+        "steps": [step(c, ev_local) for c in calls],
         "ttft_s": None if not llm or not llm["t_first_token"] else round(llm["t_first_token"] - ev_local, 4),
         "first_tool_token_s": None if not llm or not llm["t_tool_call"] else round(llm["t_tool_call"] - ev_local, 4),
         "prompt_tokens": usage.get("prompt_tokens"),
@@ -402,6 +407,28 @@ def episode(brain, event, t_recv, calls_from, tools, offset):
         "reasoning": (llm or {}).get("reasoning"),
         "said": (llm or {}).get("content"),
         "model_calls": len(calls),
+    }
+
+
+def step(call, ev_local):
+    """One model call of the turn: its times from the event (s), Cerebras' time_info, its tokens and decode speed."""
+    usage, info = call.get("usage") or {}, call.get("time_info") or {}
+    first, tool = call["t_first_token"], call["t_tool_call"]
+    decode = call["t_end"] - first if first else None
+    tokens = usage.get("completion_tokens")
+    return {
+        "request_s": round(call["t_req"] - ev_local, 4),
+        "first_token_s": None if not first else round(first - ev_local, 4),
+        "tool_token_s": None if not tool else round(tool - ev_local, 4),
+        "end_s": round(call["t_end"] - ev_local, 4),
+        "queue_time_s": info.get("queue_time"),
+        "prompt_time_s": info.get("prompt_time"),
+        "completion_time_s": info.get("completion_time"),
+        "completion_tokens": tokens,
+        "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
+        "decode_tok_s": round(tokens / decode, 1) if tokens and decode else None,
+        "tools": [t["name"] for t in call["tool_calls"]],
+        "status": call["status"],
     }
 
 
@@ -464,6 +491,8 @@ def main():
         t_recv, event = relay.wait("event", 30.0 if args.mode == "gate" else args.timeout)
         if event is None:
             sys.exit("drive.py: no event")
+        if t_recv < warmup["t_done"]:
+            sys.exit("drive.py: the event came before the warm-up turn ended, so L would include the warm-up")
         calls_from = len(Tap.calls)
         payload = {k: v for k, v in event.items() if k not in {"type", "t_wall_ns"}}
         turn = ask(args.brain, EVENT_PROMPT.format(json.dumps(payload, separators=(",", ":"))))
@@ -527,6 +556,11 @@ def main():
             f"(reasoning {e['reasoning_tokens']}, cached prompt {e['cached_tokens']}/{e['prompt_tokens']})  queue {e['queue_time_s']}  "
             f"{e['tokens_per_s']} tok/s  said {(e['said'] or '').strip()[:120]!r}"
         )
+        for t in e["tool_calls"]:
+            print(
+                f"  tool {t['tool']:<16} +{t['t_from_event_s']} s  took {t['duration_s']} s  "
+                f"applied_at_t_sim {t['reply'].get('applied_at_t_sim')}  late {t['reply'].get('late_s')}  {t['reply'].get('error') or ''}"
+            )
     t0 = Tap.calls[0]["t_req"] if Tap.calls else 0.0
     for c in Tap.calls:
         u = c["usage"] or {}
