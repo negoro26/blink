@@ -31,7 +31,7 @@ verdict is geometric, from the two schedules, judged every physics step. Poses a
 
 ## Messages
 Sim to client (unsolicited):
-- `{"type":"event","t_sim":61.0,"t_wall_ns":...,"time_to_contact_s":11.975,"person":"worker1","alert_deadline_t_sim":70.975,"estop_deadline_t_sim":72.845,"deadline_t_sim":72.845,"deadline_s":11.845,"state":{...}}`:
+- `{"type":"event","t_sim":121.0,"t_wall_ns":...,"time_to_contact_s":11.975,"person":"worker1","alert_deadline_t_sim":130.975,"estop_deadline_t_sim":132.845,"deadline_t_sim":132.845,"deadline_s":11.845,"state":{...}}`:
   the first policy step at which the vehicle moves at 1 m/s on a schedule that meets the robot or a person.
   `time_to_contact_s` is the earliest predicted contact from the schedules. For the person it meets first, the
   deadlines are the last sim time at which an alert alone, or an e-stop alone, still keeps the vehicle off him (from

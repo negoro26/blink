@@ -38,7 +38,7 @@ people:
     speed_mps: 1.4
     reaction_s: 1.5          # from the alert (wearable buzzer and voice) to his first step
     radius_m: 0.28           # worker.usda's collider capsule
-    usd: worker.usda         # demo/build_worker.py (feat/humanoid) under $CLAW_ASSETS: seen by the cameras, never contact
+    usd: worker.usda         # demo/build_worker.py under $CLAW_ASSETS: seen by the cameras, never contact
     sha256:
       worker.usda: 8bae9394458820186cd6f88a51e3a635dbb35efbfa3c4a47334b1a7773f3b661
       worker_posed.usda: b1fdbb0a40a425633ca71cfc86c9f5fc32cddccc86491de799b58f180f3a001e
