@@ -10,7 +10,8 @@ incident, into the sim's log).
 The same server drives any sim that serves the protocol (the Kit-less runner, the Kit scene) on $BLINK_HOST:$BLINK_PORT.
 Every call is one JSON line in $ROBOT_MCP_LOG (default $BOX_RUN/mcp.jsonl, else ./mcp.jsonl): the tool, its
 arguments, the wall clock (CLOCK_REALTIME ns) on entry, the request's t_wall_ns, the reply (applied_at_t_sim, late_s)
-and the wall clock on exit.
+and the wall clock on exit. Each frame site_camera returns is also kept, byte for byte, as camera/<wall ns on exit>-<name>.jpg
+beside the log; the log line names it (`jpeg`).
 """
 
 import asyncio
@@ -35,6 +36,7 @@ class Link:
         self.sim = None
         self.lock = threading.Lock()
         self.log = Path(log_path).open("a", encoding="utf-8", buffering=1)  # noqa: SIM115 - for the process's life
+        self.frames = Path(log_path).parent / "camera"
 
     def request(self, op, **fields):
         """(request, reply) of one protocol round trip."""
@@ -62,7 +64,13 @@ class Link:
         reply = {k: v for k, v in reply.items() if k != "id"}
         logged = {k: v for k, v in reply.items() if k != "jpeg_b64"}
         record = {"tool": op, "args": args, "wall_ns": wall_in, "t_wall_ns": req and req["t_wall_ns"]}
-        self.log.write(json.dumps({**record, "reply": logged, "wall_ns_out": time.time_ns()}) + "\n")
+        wall_out = time.time_ns()
+        if "jpeg_b64" in reply:
+            self.frames.mkdir(exist_ok=True)
+            jpeg = self.frames / f"{wall_out}-{args.get('name', 'camera')}.jpg"
+            jpeg.write_bytes(base64.b64decode(reply["jpeg_b64"]))
+            record["jpeg"] = str(jpeg)
+        self.log.write(json.dumps({**record, "reply": logged, "wall_ns_out": wall_out}) + "\n")
         return reply
 
 
