@@ -25,3 +25,38 @@
 Verdict: NO-GO at every effort. No effort passes, so the rule picks none. What limits L (measured): Cerebras queue_time
 0.01 to 10.1 s per call under hackathon load, OpenClaw's own time from the event to the model request 1.7 to 2.7 s,
 and 400 to 1,060 reasoning tokens at 260 to 420 tok/s even at effort low. Every decision was evade left, the right one.
+
+## Where L goes (measured 2026-11-21 21:25-21:50 EET)
+
+- Inside OpenClaw: the gateway receives the turn 6 to 23 ms after the sim's event reaches the laptop (216 ms once), and
+  sends the model request 1.72 to 2.73 s later (20 turns above). The request is 26.8 kB: a 20,930-character system
+  prompt and the tool directory, about 6,040 prompt tokens of which 5,120 were cached. The gateway log shows only
+  admission (~35 ms) for that span; the rest (prompt assembly, session and MCP runtime build) is not broken down there.
+- Lean floor: the same AGENTS.md as the system prompt, the same EVENT and the five robot tools sent straight to Cerebras
+  (744 prompt tokens, none cached), streamed:
+
+| effort | request to first token s | request to tool call s | queue_time s | tool call minus queue s | reasoning tokens | decision |
+|---|---|---|---|---|---|---|
+| low | 21.55 | 21.93 | 21.17 | 0.76 | 98 | robot_evade left |
+| low | 22.36 | 23.01 | 22.01 | 1.00 | 192 | robot_evade left |
+| low | 11.68 | 12.24 | 11.19 | 1.06 | 153 | robot_evade left |
+| low | 13.48 | 13.91 | 13.04 | 0.86 | 94 | robot_evade left |
+| low | 7.96 | 8.46 | 7.52 | 0.95 | 45 | robot_evade left |
+| high | 11.61 | 12.36 | 11.19 | 1.17 | 221 | robot_evade left |
+| high | 5.72 | 6.85 | 5.26 | 1.59 | 209 | robot_evade left |
+| high | 5.18 | 6.36 | 4.61 | 1.75 | 240 | robot_evade left |
+| high | 16.20 | 17.03 | 15.82 | 1.21 | 262 | robot_evade left |
+| high | 11.27 | 12.12 | 10.81 | 1.31 | 217 | robot_evade left |
+
+At this hour queue_time (4.6 to 22.0 s) is nearly all of L. Without it the floor from request to tool call is 0.76 to
+1.06 s at effort low and 1.17 to 1.75 s at high, before OpenClaw's ~2.2 s and the ssh hops.
+
+## Scripted proof of the catch-up rule (no model)
+
+| run | evade left at L | applied at t_sim | outcome |
+|---|---|---|---|
+| 20261121-202422-wh-proof-l03 (ovrtx, 25 Hz cameras) | 0.300 s | 40.82 | collision false, min gap 0.491 m |
+| 20261121-204152-wh-proof-l30 (newton_warp, no cameras) | 3.000 s | 43.52 | collision true, contact 42.88, 61.9 kN |
+
+Sim speed on gpu-host GPU 3 (shared, load 110 to 250): 0.29 times real time with ovrtx rendering both cameras at 25 Hz;
+2.14 to 2.24 times real time (427 to 448 physics steps/s) with no cameras, held to 1.0 by the wall mapping after the event.
