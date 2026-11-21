@@ -12,13 +12,17 @@ The agent reaches its model through a tap this script runs on 127.0.0.1:18790 (b
 OpenClaw's models.providers point at it; scripts/claw/openclaw.sh setup writes them). The tap forwards each request
 with the effort set and stream usage on, streams the answer back as it arrives, and records every streamed piece
 (reasoning, text, tool call name and arguments) with its wall time, and the call's usage. Authorization passes
-through and is never recorded.
+through and is never recorded. A request the provider refuses (HTTP 429) the tap sends again itself, after each of
+RETRY_DELAYS (8 resends, at most 3 s apart); OpenClaw's own backoff doubles from 1 s to 30 s.
 
 The sim side is one protocol connection (robot_mcp.sim relay through scripts/claw/box_cmd.sh): the event and the
 outcome arrive on it. `gate` runs robot_mcp.replay on gpu-host with --event (a recorded sim event) and fires it
---repeat times; `live` waits for a live session's own event. Each event goes to the agent as one prompt
-(EVENT_PROMPT, a fresh OpenClaw session). Before the first, one warm-up turn (WARMUP) starts the MCP server and
-fills the provider's prompt cache, as a robot's brain is up before its hazard.
+--repeat times, each into a fresh OpenClaw session; `live` waits for a live session's own event and hands it to the
+session its warm-up turn opened (OpenClaw starts the MCP server once per session). Each event goes to the agent as
+one prompt (EVENT_PROMPT) with EVENT_CAMERA's frame, asked for on the relay as the event arrives, attached as an
+image: the agent sees the site in the same model call that acts. Before the first event, one warm-up turn (WARMUP,
+one model call) starts the MCP server and fills the provider's prompt cache, as a robot's brain is up before its
+hazard.
 
 The MCP server's log (robot_mcp/server.py, gpu-host's clock) gives each tool call's request t_wall_ns and the sim's
 reply (applied_at_t_sim, late_s); L is the first action's (ACTIONS) request t_wall_ns minus the event's, both read on
@@ -26,9 +30,10 @@ gpu-host's clock. Tap times are this laptop's, shifted onto gpu-host's by an off
 (min-RTT sample).
 
 Writes demo/results/<run>.json: compose_split.sh's keys (run, model, reaction_ms, tokens_per_s, outcome), the event,
-the outcome, every tool call, every model call with its token stream, and the agent's final text. A model call the
-provider refused (HTTP 429, which OpenClaw retries) stays in the list with its status and error; an episode's retry_s
-sums the time from each refused request to the next request, so L splits into retries, queue and decode.
+the outcome, every tool call, every model call with its token stream, the event frame (kept byte for byte as
+camera/<event t_wall_ns>-<camera>-event.jpg beside the MCP log) and the agent's final text. A refused model call stays
+in the list with its status and error; an episode's retry_s sums the time from each refused request to the next
+request, so L splits into retries, queue and decode.
 """
 
 import argparse
@@ -70,7 +75,12 @@ BRAINS = {
 ACTIONS = {"site_estop", "site_alert", "robot_dispatch"}
 """The tool calls that act on the hazard: the first one's request ends L."""
 EVENT_PROMPT = "EVENT {}"
-WARMUP = "Warm-up, no hazard: call site_get_state once, then answer only OK."
+EVENT_CAMERA = "chase"
+"""The camera whose frame, taken when the event arrives, rides in the event prompt (the CCTV up the aisle)."""
+WARMUP = "Warm-up, no hazard: answer only OK."
+RETRY_DELAYS = (0.5, 1.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0)
+"""The tap's waits (s) before each resend of a refused (HTTP 429) model request: 8 resends, at most 3 s apart.
+OpenClaw's own backoff (1 s doubling to 30 s) sees a refusal only once these are spent."""
 
 
 def now():
@@ -108,7 +118,10 @@ class Tap(BaseHTTPRequestHandler):
         self.forward(self.rfile.read(int(self.headers.get("Content-Length", 0))), t_req)
 
     def forward(self, body, t_req):
-        """Send body upstream with the effort set, stream the answer back, record a chat request."""
+        """Send body upstream with the effort set, stream the answer back, record a chat request.
+
+        A refused chat request (HTTP 429) is sent again after each of RETRY_DELAYS, each refusal recorded as its own
+        call; only the last answer reaches OpenClaw."""
         name, _, rest = self.path.lstrip("/").partition("/")
         if name not in UPSTREAM:
             self.send_error(404, f"no upstream {name}")
@@ -124,12 +137,28 @@ class Tap(BaseHTTPRequestHandler):
             body = json.dumps(req).encode()
         up = urlsplit(UPSTREAM[name])
         conn_cls = http.client.HTTPSConnection if up.scheme == "https" else http.client.HTTPConnection
-        conn = conn_cls(up.netloc, timeout=300)
         skip = {"host", "content-length", "accept-encoding", "connection"}
         headers = {k: v for k, v in self.headers.items() if k.lower() not in skip}
         headers["Accept-Encoding"] = "identity"
-        conn.request(self.command, f"{up.path}/{rest}".replace("//", "/"), body=body or None, headers=headers)
-        resp = conn.getresponse()
+
+        def send():
+            conn = conn_cls(up.netloc, timeout=300)
+            conn.request(self.command, f"{up.path}/{rest}".replace("//", "/"), body=body or None, headers=headers)
+            return conn, conn.getresponse()
+
+        conn, resp = send()
+        for delay in RETRY_DELAYS if req is not None else ():
+            if resp.status != 429:
+                break
+            rec = record(name, req, len(body), t_req, resp.status)
+            scan(rec, resp.read(), now())
+            conn.close()
+            rec["t_end"] = now()
+            with Tap.lock:
+                Tap.calls.append(rec)
+            time.sleep(delay)
+            t_req = now()
+            conn, resp = send()
         self.send_response(resp.status)
         for k, v in resp.getheaders():
             if k.lower() not in {"transfer-encoding", "content-length", "connection", "content-encoding"}:
@@ -170,7 +199,9 @@ def record(upstream, req, size, t_req, status):
         "system_chars": sum(
             len(m["content"]) for m in msgs if m.get("role") == "system" and isinstance(m.get("content"), str)
         ),
-        "last_user": next((m.get("content") for m in reversed(msgs) if m.get("role") in {"user", "tool"}), None),
+        "last_user": without_images(
+            next((m.get("content") for m in reversed(msgs) if m.get("role") in {"user", "tool"}), None)
+        ),
         "stream": [],
         "content": "",
         "reasoning": "",
@@ -179,6 +210,18 @@ def record(upstream, req, size, t_req, status):
         "time_info": None,
         "error": None if status == 200 else "",
     }
+
+
+def without_images(content):
+    """A message's content with each image part's data replaced by its mime type and size."""
+    if not isinstance(content, list):
+        return content
+    out = []
+    for part in content:
+        url = (part.get("image_url") or {}).get("url", "") if isinstance(part, dict) else ""
+        head, _, data = url.partition(",")
+        out.append({"type": "image_url", "image": head, "base64_chars": len(data)} if data else part)
+    return out
 
 
 def scan(rec, line, t):
@@ -273,17 +316,25 @@ def gateway_token():
     return token
 
 
-def ask(brain, prompt):
-    """One agent turn in a fresh OpenClaw session over the gateway's chat completions endpoint, streamed."""
+def ask(brain, prompt, session=None, jpeg_b64=None):
+    """One agent turn over the gateway's chat completions endpoint, streamed: in OpenClaw session `session` (the
+    endpoint's `user`; None: a fresh session), with the JPEG attached when given."""
     up = urlsplit(GATEWAY)
     conn = http.client.HTTPConnection(up.netloc, timeout=600)
-    body = json.dumps({"model": "openclaw/blink", "stream": True, "messages": [{"role": "user", "content": prompt}]})
+    content = prompt
+    if jpeg_b64 is not None:
+        image = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{jpeg_b64}"}}
+        content = [{"type": "text", "text": prompt}, image]
+    msg = {"model": "openclaw/blink", "stream": True, "messages": [{"role": "user", "content": content}]}
+    if session is not None:
+        msg["user"] = session
+    body = json.dumps(msg)
     headers = {
         "Authorization": f"Bearer {gateway_token()}",
         "Content-Type": "application/json",
         "x-openclaw-model": f"{BRAINS[brain]['provider']}/{BRAINS[brain]['model']}",
     }
-    turn = {"prompt": prompt, "t_sent": now(), "t_first_chunk": None, "text": "", "error": None}
+    turn = {"prompt": prompt, "session": session, "t_sent": now(), "t_first_chunk": None, "text": "", "error": None}
     conn.request("POST", "/v1/chat/completions", body=body, headers=headers)
     resp = conn.getresponse()
     if resp.status != 200:
@@ -310,6 +361,7 @@ class Relay:
         cmd = [str(HERE / "box_cmd.sh"), *target, "--", "python3", "-u", "-m", "robot_mcp.sim", "relay"]
         self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
         self.msgs: queue.Queue = queue.Queue()
+        self.sent = 0
         threading.Thread(target=self.read, daemon=True).start()
 
     def read(self):
@@ -321,13 +373,15 @@ class Relay:
         self.msgs.put((now(), None))
 
     def send(self, req):
-        """One request line (the relay stamps t_wall_ns)."""
+        """One request line (the relay stamps t_wall_ns); its protocol id (the relay numbers its requests from 1)."""
         assert self.proc.stdin is not None
         self.proc.stdin.write(json.dumps(req) + "\n")
         self.proc.stdin.flush()
+        self.sent += 1
+        return self.sent
 
-    def wait(self, kind, timeout):
-        """(receive time, message) of the next message of type kind, or (None, None)."""
+    def wait(self, timeout, **match):
+        """(receive time, message) of the next message whose fields equal match, or (None, None); skips the rest."""
         end = now() + timeout
         while (left := end - now()) > 0:
             try:
@@ -336,7 +390,7 @@ class Relay:
                 break
             if msg is None:
                 break
-            if msg.get("type") == kind:
+            if all(msg.get(k) == v for k, v in match.items()):
                 return t, msg
         return None, None
 
@@ -438,14 +492,37 @@ def step(call, ev_local):
     }
 
 
-def warm(brain):
+def warm(brain, session):
     """The warm-up turn; its record."""
-    turn = ask(brain, WARMUP)
+    turn = ask(brain, WARMUP, session)
     print(
         f"warm-up: {turn['t_done'] - turn['t_sent']:.2f} s, error {turn['error']}, text {turn['text'][:80]!r}",
         flush=True,
     )
     return turn
+
+
+def event_frame(relay, event, t_recv, offset):
+    """EVENT_CAMERA's frame asked for as the event arrives: (its base64 JPEG or None, its record)."""
+    rid = relay.send({"op": "site_camera", "name": EVENT_CAMERA})
+    t, reply = relay.wait(10.0, id=rid)
+    info = {"camera": EVENT_CAMERA, "t_sim": (reply or {}).get("t_sim"), "error": (reply or {}).get("error")}
+    info["received_s"] = None if t is None else round(t - (event["t_wall_ns"] / 1e9 + offset), 4)
+    info["after_recv_s"] = None if t is None else round(t - t_recv, 4)
+    jpeg = (reply or {}).get("jpeg_b64")
+    if jpeg is None:
+        print(f"drive.py: no {EVENT_CAMERA} frame for the event ({info}); the prompt goes without it", flush=True)
+    return jpeg, info
+
+
+def keep_frame(jpeg, info, event, log_path):
+    """Keep the event's frame byte for byte beside the MCP server's (camera/<event t_wall_ns>-<name>-event.jpg next
+    to log_path on gpu-host), named in info."""
+    path = f"{log_path.rsplit('/', 1)[0]}/camera/{event['t_wall_ns']}-{info['camera']}-event.jpg"
+    subprocess.run(
+        [*SSH, f"mkdir -p {path.rsplit('/', 1)[0]} && base64 -d > {path}"], input=jpeg, text=True, check=True
+    )
+    info["jpeg"] = path
 
 
 def main():
@@ -487,29 +564,36 @@ def main():
         openclaw_target(*target)
         relay = Relay(target)
         log_path = f"~/sim-runs/{args.session}/mcp.jsonl"
-    warmup = warm(args.brain)
+    # live: the warm-up and the event share one OpenClaw session, so the event turn finds the MCP server up (OpenClaw
+    # starts one per session); gate: every turn in a fresh session, so no event sees an earlier one.
+    session = (args.run or args.session) if args.mode == "live" else None
+    warmup = warm(args.brain, session)
     episodes, turns, outcome = [], [], None
     n = args.repeat if args.mode == "gate" else 1
     for i in range(n):
         if args.mode == "gate":
             time.sleep(1.0)
             relay.send({"op": "fire"})
-        t_recv, event = relay.wait("event", 30.0 if args.mode == "gate" else args.timeout)
+        t_recv, event = relay.wait(30.0 if args.mode == "gate" else args.timeout, type="event")
         if event is None:
             sys.exit("drive.py: no event")
         if t_recv < warmup["t_done"]:
             sys.exit("drive.py: the event came before the warm-up turn ended, so L would include the warm-up")
+        jpeg, frame = event_frame(relay, event, t_recv, offset)
         calls_from = len(Tap.calls)
         payload = {k: v for k, v in event.items() if k not in {"type", "t_wall_ns"}}
-        turn = ask(args.brain, EVENT_PROMPT.format(json.dumps(payload, separators=(",", ":"))))
-        turn["calls_from"] = calls_from
+        turn = ask(args.brain, EVENT_PROMPT.format(json.dumps(payload, separators=(",", ":"))), session, jpeg)
+        turn["calls_from"], turn["frame"] = calls_from, frame
+        if jpeg is not None:
+            keep_frame(jpeg, frame, event, log_path)
         turns.append((turn, event, t_recv))
         print(
-            f"event {i}: turn {turn['t_done'] - t_recv:.2f} s, error {turn['error']}, text {turn['text'][:160]!r}",
+            f"event {i}: frame {frame}, turn {turn['t_done'] - t_recv:.2f} s, error {turn['error']}, "
+            f"text {turn['text'][:160]!r}",
             flush=True,
         )
     if args.mode == "live":
-        _, outcome = relay.wait("outcome", 120.0)
+        _, outcome = relay.wait(120.0, type="outcome")
     time.sleep(0.5)
     tools = remote_lines(log_path, start_ns)
     for turn, event, t_recv in turns:

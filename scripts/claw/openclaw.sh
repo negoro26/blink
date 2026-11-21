@@ -12,7 +12,9 @@ usage="usage: openclaw.sh setup | gateway | target <session-name> | target --rep
            blinkcerebras (Cerebras, key from CEREBRAS_API_KEY: Kimi K3.1 Pro and Qwen 3.8 27B) and blinkvllm
            (a self-hosted vLLM on gpu-host), both through scripts/claw/drive.py's timing tap on 127.0.0.1:18790,
            and the gateway's /v1/chat/completions endpoint with a token kept in ~/.config/blink/gateway.token
-           (made once, mode 600). Idempotent.
+           (made once, mode 600); and the agent's session settings (its agentDir's settings.json):
+           retry.provider.maxRetries 8, maxRetryDelayMs 3000 (a 429 asking for a longer wait ends the turn
+           instead of stalling it; drive.py's tap resends refused requests itself first). Idempotent.
   gateway  runs the gateway in the foreground with ~/.config/cerebras.env and that token in its environment.
   target   points the MCP server robot at a live session's box or at robot_mcp.replay's port: writes
            ~/.config/blink/target and disposes the gateway's MCP runtimes, so the next turn starts the server
@@ -31,6 +33,8 @@ case "${1:-}" in
         mkdir -p "$CONF" "$WORKSPACE"
         [[ -s "$TOKEN_FILE" ]] || (umask 077 && head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$TOKEN_FILE")
         cp "$REPO/robot_mcp/openclaw/AGENTS.md" "$WORKSPACE/AGENTS.md"
+        mkdir -p "$HOME/.openclaw/agents/blink/agent"
+        echo '{"retry": {"provider": {"maxRetries": 8, "maxRetryDelayMs": 3000}}}' > "$HOME/.openclaw/agents/blink/agent/settings.json"
         kimi='{"id": "moonshotai-kimi-k3.1-pro-trial", "name": "Kimi K3.1 Pro (Cerebras)", "input": ["text", "image"], "reasoning": true, "contextWindow": 131072, "maxTokens": 8192}'
         qwen='{"id": "qwen-3.8-27b", "name": "Qwen 3.8 27B (Cerebras)", "input": ["text", "image"], "reasoning": true, "contextWindow": 65536, "maxTokens": 8192}'
         vllm='{"id": "qwen-27b", "name": "Qwen3.8-27B fine-tune (vLLM, GPU)", "input": ["text", "image"], "reasoning": true, "contextWindow": 65536, "maxTokens": 8192,
