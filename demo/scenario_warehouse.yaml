@@ -1,0 +1,64 @@
+# The claw demo's scene in warehouse1 (NVIDIA's Simple_Warehouse, --renderer ovrtx) for ANYmal-D under
+# run_legged: the robot stands in a rack aisle scanning a pallet bay while a forklift reverses down the
+# aisle at it. Read by `run_legged.py --scenario` (the sim's scenario module), scripts/claw/watch.py and the MCP server; the
+# `car:` block is the vehicle, here the forklift.
+#
+# Frame: warehouse1's world frame, the frame of /sim/odom and /sim/car/odom: the origin is world.yaml's spawn point
+# (-12.4, 3.0 in the hall's coordinates), the axes are the hall's (x east, y north), metres, yaw in radians from +x.
+#
+# The aisle runs north-south between rack rows 3 (hall x -16.0..-14.87) and 4 (hall x -11.0..-9.85), 3.87 m wide, from
+# the rack ends at hall y 8.75 to 24.75. Both rows are contact here (`obstacles`); the rest of the hall is only seen.
+# The forklift reverses south down the aisle, counterweight first, its 1.214 m body 0.4 m off row 4: its swept band is
+# hall x -12.614..-11.400. ANYmal-D is 0.93 x 0.53 m; it stands in the band facing up the aisle at the forklift.
+
+robot_start: [0.5, 11.8, 1.5707963]  # hall (-11.9, 14.8), facing north up the aisle; row 4's pallet bay on its right
+
+sides:
+  # Robot-relative, at robot_start. The forklift's line runs along the robot's heading.
+  blocked: right  # row 4: 0.64 m from the robot's side to the rack, 0.4 m between the forklift and the rack
+  free: left      # the aisle's west half: 2.7 m from the robot's side to row 3
+  along_car_line: [front, back]  # the forklift comes from the front at 3.5 m/s; backing away stays in its path
+
+car:  # the forklift
+  usd: forklift.usda  # demo/build_forklift.py <Isaac assets>/Props/Forklift/forklift.usd forklift.usda, under $CLAW_ASSETS
+  usd_sha256: c3ad1f7de4b3076050c05f064580383c89e119a5a25064113c3dd7edcd844b88
+  length_m: 3.495  # counterweight to fork tips; the collider is the body, 2.313 m from the counterweight
+  width_m: 1.214
+  start: [0.393, 21.0, 1.5707963]  # hall (-12.007, 24.0), forks north, at the aisle's north end
+  reverse: true
+  t_go: 40.0          # sim s
+  accel_mps2: 2.0
+  speed_mps: 3.5      # 12.6 km/h
+  brake_mps2: 4.0
+  stop_after_m: 10.0  # stopped with its counterweight 2 m past the robot
+
+obstacles:  # static box colliders [x0, y0, x1, y1, height], world frame: the two rack rows of the aisle
+  - {name: row3, box: [-3.6, 5.75, -2.47, 21.75, 2.5]}
+  - {name: row4, box: [1.4, 5.75, 2.55, 21.75, 2.5]}
+
+robots:
+  anymal_d:
+    clear_motion: left at vy 1.0 m/s, through /cmd_vel
+    clear_distance_m: 1.03  # the robot's right side (0.265 m from the base) out of the forklift's band plus 5 cm
+    clear_time_s: 1.36      # measured: scripts/claw/clear_test.py, run 20261121-165609-wh-clear2 (1.36, 1.34 s)
+    window_s: 2.36          # clear_time_s + 1.0: the EVENT-to-contact time the start and schedule are set for
+
+odom_hz: 20.0
+
+front_camera:  # the inspection payload: the front camera raised on a mast, 0.95 m above the floor
+  xyz: [0.45, 0.0, 0.38]
+  hfov_deg: 70.0
+
+inspection:
+  - {id: A, stand_at: [0.5, 11.8, 1.5707963], defect: null}  # robot_start; the forklift comes here
+
+chase:  # world-fixed third-person camera behind the robot's left shoulder, looking up the aisle at the forklift
+  eye: [-1.3, 7.8, 1.9]
+  target: [0.5, 16.5, 0.8]
+  hfov_deg: 70.0
+  width: 1920
+  height: 1080
+
+record:
+  fps: 30
+  front: [1280, 720]
