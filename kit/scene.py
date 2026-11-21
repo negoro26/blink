@@ -2,11 +2,11 @@
 
 One deterministic scenario (CPU PhysX, fixed dt, fixed seed, pinned box paths) run by hand-stepped physics:
 SimulationManager.step() per physics tick, the ANYmal policy in the post-physics callback, renders only when asked
-(record mode: every 1/30 s of sim time; live mode: on a snapshot request). The protocol server from
-SIM_PROTOCOL.md runs in the same loop (newline JSON over TCP, the catch-up time rule, blink_log.jsonl).
+(record mode: every 1/30 s of sim time; --stills: at the listed times). No brain acts in this beat: with --reflex the
+robot's own local rule escapes, without it nothing commands the robot.
 
-Usage (Isaac Sim python): scene.py --out RUN_DIR [--serve] [--record] [--port 47800] [--until T]
-  --serve   listen on 127.0.0.1:$BLINK_PORT and wait for a client before stepping
+Usage (Isaac Sim python): scene.py --out RUN_DIR [--reflex] [--record] [--until T]
+  --reflex  the robot's local safety layer evades on its own (no network, no LLM)
   --record  1080p chase + 720p mast frames from t_event - pre to the end, with a per-frame sim-time index
 """
 
@@ -15,8 +15,6 @@ import datetime
 import json
 import math
 import os
-import select
-import socket
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -25,9 +23,6 @@ T0 = time.time()
 ap = argparse.ArgumentParser()
 ap.add_argument("--out", required=True)
 ap.add_argument("--cfg", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "shot.json"))
-ap.add_argument("--serve", action="store_true")
-ap.add_argument("--port", type=int, default=int(os.environ.get("BLINK_PORT", "47800")))
-ap.add_argument("--wait_client_s", type=float, default=900.0)
 ap.add_argument("--record", action="store_true")
 ap.add_argument("--workers", type=int, default=3)
 ap.add_argument("--no_ira", action="store_true", help="open the stage directly (no IRA, no workers)")
@@ -130,8 +125,6 @@ if args.workers:
     }
 cfg_path = os.path.join(OUT, "ira_config.yaml")
 yaml.safe_dump({"isaacsim.replicator.agent": cfg}, open(cfg_path, "w"), sort_keys=False)
-
-import contextlib
 
 import isaacsim.replicator.agent.core.scene_assembly.environment_loader as _el
 import omni.anim.navigation.core as nav
@@ -265,10 +258,6 @@ def forklift_y(t):
         return Y_REV0 + sd
     u = min((t - T_HIT) / 0.15, 1.0)  # small rebound off the upright
     return Y_HIT - 0.06 * math.sin(math.pi * 0.5 * u)
-
-
-def forklift_vy(t):
-    return (forklift_y(t + 1e-3) - forklift_y(t - 1e-3)) / 2e-3
 
 
 fk_translate.Set(Gf.Vec3d(F["x"], forklift_y(0.0), 0.0))
@@ -515,100 +504,6 @@ def exit_m(p, yaw):
     return out
 
 
-T_IMPACT = SHOT.get("t_impact_nobrain") or (T_HIT + 0.5)
-
-
-def hazard_state(p, yaw, t):
-    zx, zy = 0.5 * (ZONE[0] + ZONE[2]) - p[0], 0.5 * (ZONE[1] + ZONE[3]) - p[1]
-    hx, hy = to_robot(zx, zy, yaw)
-    return {
-        "kind": "falling_boxes",
-        "x": round(hx, 3),
-        "y": round(hy, 3),
-        "vx": 0.0,
-        "vy": 0.0,
-        "time_to_impact_s": round(max(0.0, T_IMPACT - t), 3),
-        "exit_m": exit_m(p, yaw),
-    }
-
-
-# ---------------------------------------------------------------- protocol server
-BLOG = open(os.path.join(OUT, "blink_log.jsonl"), "a")
-
-
-def blog(rec):
-    rec.setdefault("wall_ns", time.time_ns())
-    rec.setdefault("t_sim", round(t_sim, 4))
-    BLOG.write(json.dumps(rec) + "\n")
-    BLOG.flush()
-
-
-class Server:
-    def __init__(self, port):
-        self.ls = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.ls.bind(("127.0.0.1", port))
-        self.ls.listen(4)
-        self.ls.setblocking(False)
-        self.clients, self.buf, self.queue = [], {}, []
-
-    def poll(self):
-        r, _, _ = select.select([self.ls, *self.clients], [], [], 0)
-        for sock in r:
-            if sock is self.ls:
-                c, _ = self.ls.accept()
-                c.setblocking(True)
-                c.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                self.clients.append(c)
-                self.buf[c] = b""
-                blog({"dir": "info", "msg": "client connected"})
-                if EV["msg"]:
-                    self.send(c, EV["msg"])
-                continue
-            data = sock.recv(65536)
-            if not data:
-                self.clients.remove(sock)
-                self.buf.pop(sock, None)
-                blog({"dir": "info", "msg": "client closed"})
-                continue
-            self.buf[sock] += data
-            while b"\n" in self.buf[sock]:
-                line, self.buf[sock] = self.buf[sock].split(b"\n", 1)
-                if line.strip():
-                    try:
-                        msg = json.loads(line)
-                    except Exception as e:
-                        self.send(sock, {"id": None, "error": f"bad json: {e}"})
-                        continue
-                    blog({"dir": "in", "msg": msg})
-                    self.queue.append([sock, msg, None])
-
-    def send(self, sock, obj):
-        with contextlib.suppress(OSError):
-            sock.sendall((json.dumps(obj) + "\n").encode())
-        rec = {
-            "dir": "out",
-            "msg": obj if "jpeg_b64" not in obj else {**obj, "jpeg_b64": f"<{len(obj['jpeg_b64'])} b64 chars>"},
-        }
-        blog(rec)
-
-    def broadcast(self, obj):
-        if not self.clients:
-            blog({"dir": "out", "msg": obj, "note": "no client"})
-        for c in list(self.clients):
-            self.send(c, obj)
-
-
-EV = {"msg": None, "t": None, "wall": None}
-srv = Server(args.port) if args.serve else None
-if srv:
-    log(f"listening 127.0.0.1:{args.port}")
-    t_w = time.time()
-    while not srv.clients and time.time() - t_w < args.wait_client_s:
-        srv.poll()
-        time.sleep(0.01)
-    log(f"client_connected={bool(srv.clients)} waited_s={time.time() - t_w:.1f}")
-
 # ---------------------------------------------------------------- run state
 REC = SHOT["record"]
 FPS = int(REC["fps"])
@@ -626,8 +521,7 @@ ST = {
     "max_tilt": 0.0,
     "shoved": False,
     "n": 0,
-    "last_pose": None,
-    "vel": (0.0, 0.0, 0.0),
+    "t_event": None,
     "frame": 0,
     "next_frame_t": 0.0,
     "outcome_sent": False,
@@ -660,17 +554,6 @@ def render():
     t_ = time.perf_counter()
     rep.orchestrator.step(delta_time=1.0 / FPS, pause_timeline=False, rt_subframes=1)
     ST["render_ms"].append((time.perf_counter() - t_) * 1000)
-    ST["mast_t"] = t_sim
-
-
-def mast_jpeg():
-    import base64
-    import io
-
-    img = Image.fromarray(ann_mast.get_data()[:, :, :3]).resize((640, 360), Image.BILINEAR)
-    b = io.BytesIO()
-    img.save(b, "JPEG", quality=80)
-    return base64.b64encode(b.getvalue()).decode()
 
 
 def hold_here(p, yaw):
@@ -685,21 +568,13 @@ def command_for(t, p, yaw):
         return HOLD[2:5]
     if MODE.pop("after_hold", False):
         hold_here(p, yaw)
-    k = MODE["kind"]
-    if k == "evade":
+    if MODE["kind"] == "evade":
         if t < MODE["until"]:
             return MODE["v"]
         hold_here(p, yaw)
-        k = "hold"
     ex, ey = to_robot(MODE["x"] - p[0], MODE["y"] - p[1], yaw)
     dist = math.hypot(ex, ey)
     eyaw = math.atan2(math.sin(MODE["yaw"] - yaw), math.cos(MODE["yaw"] - yaw))
-    if k == "goal":
-        if dist < 0.15 and abs(eyaw) < 0.1:
-            hold_here(p, yaw)
-            return [0.0, 0.0, 0.0]
-        sp = min(1.0, dist) / max(dist, 1e-6)
-        return [ex * sp, ey * sp, max(-1.0, min(1.0, 1.5 * eyaw))]
     sp = min(0.3, 3.0 * dist) / max(dist, 1e-6)
     return [ex * sp, ey * sp, max(-0.5, min(0.5, 3.0 * eyaw))]
 
@@ -715,7 +590,7 @@ def physics_step():
             rb.GetVelocityAttr().Set(Gf.Vec3f(*b["v"]))
             rb.GetAngularVelocityAttr().Set(Gf.Vec3f(*b["w"]))
         ST["shoved"] = True
-        blog({"dir": "info", "msg": "boxes shoved", "t_shove": round(t_next, 4)})
+        log(f"boxes shoved t_shove={t_next:.4f}")
     t_ = time.perf_counter()
     SimulationManager.step(steps=1)
     ST["step_ms"].append((time.perf_counter() - t_) * 1000)
@@ -742,12 +617,6 @@ def physics_step():
     ST["max_force"] = max(ST["max_force"], f_step)
     if ST["n"] % 4 == 0:  # control-rate bookkeeping (50 Hz)
         p, yaw, tilt = robot_pose()
-        if ST["last_pose"] is not None:
-            lp, lyaw, lt = ST["last_pose"]
-            vxw, vyw = (p[0] - lp[0]) / (t_sim - lt), (p[1] - lp[1]) / (t_sim - lt)
-            vx, vy = to_robot(vxw, vyw, yaw)
-            ST["vel"] = (vx, vy, math.atan2(math.sin(yaw - lyaw), math.cos(yaw - lyaw)) / (t_sim - lt))
-        ST["last_pose"] = (p, yaw, t_sim)
         CMD[:] = command_for(t_sim, p, yaw)
         gap = 99.0
         c, s_ = math.cos(yaw), math.sin(yaw)
@@ -786,63 +655,6 @@ def physics_step():
         )
 
 
-def state_reply(rid):
-    p, yaw, _ = robot_pose()
-    vx, vy, wz = ST["vel"]
-    return {
-        "id": rid,
-        "t_sim": round(t_sim, 4),
-        "late_s": 0.0,
-        "pose": {"x": round(p[0], 4), "y": round(p[1], 4), "yaw": round(yaw, 4)},
-        "vel": {"vx": round(vx, 3), "vy": round(vy, 3), "wz": round(wz, 3)},
-        "hazard": hazard_state(p, yaw, t_sim),
-        "free_m": free_m(p, yaw),
-    }
-
-
-EVADE = {"forward": (1.0, 0.0), "back": (-1.0, 0.0), "left": (0.0, 1.0), "right": (0.0, -1.0), "stop": (0.0, 0.0)}
-SNAP_MAX_AGE = 0.5
-
-
-def apply_request(sock, msg, late):
-    rid, op = msg.get("id"), msg.get("op")
-    if op == "get_state":
-        r = state_reply(rid)
-        r["late_s"] = late
-        srv.send(sock, r)
-    elif op == "evade":
-        d = msg.get("direction")
-        if d not in EVADE:
-            srv.send(sock, {"id": rid, "error": f"bad direction {d!r}"})
-            return
-        dur = float(msg.get("duration_ms", 1500)) / 1000.0
-        MODE.clear()
-        MODE.update(kind="evade", v=[EVADE[d][0], EVADE[d][1], 0.0], until=t_sim + dur)
-        srv.send(sock, {"id": rid, "applied_at_t_sim": round(t_sim, 4), "late_s": late})
-        blog({"dir": "cmd", "msg": {"evade": d, "v": MODE["v"], "until": round(MODE["until"], 4)}})
-    elif op == "set_goal":
-        try:
-            MODE.clear()
-            MODE.update(kind="goal", x=float(msg["x"]), y=float(msg["y"]), yaw=float(msg.get("yaw", 0.0)))
-        except (KeyError, TypeError, ValueError) as e:
-            srv.send(sock, {"id": rid, "error": f"bad goal: {e}"})
-            return
-        srv.send(sock, {"id": rid, "applied_at_t_sim": round(t_sim, 4), "late_s": late})
-        blog({"dir": "cmd", "msg": {"goal": [MODE["x"], MODE["y"], MODE["yaw"]]}})
-    elif op == "snapshot":
-        # Live mode renders on demand (~0.45 s of wall time with no stepping); a frame up to SNAP_MAX_AGE sim-seconds
-        # old is reused so a snapshot does not cost the brain a render. t_sim is the frame's own time.
-        if not args.record and (ST.get("mast_t") is None or t_sim - ST["mast_t"] > SNAP_MAX_AGE):
-            render()
-        srv.send(sock, {"id": rid, "t_sim": round(ST["mast_t"], 4), "late_s": late, "jpeg_b64": mast_jpeg()})
-    else:
-        srv.send(sock, {"id": rid, "error": f"unknown op {op!r}"})
-
-
-def t_map(wall_ns):
-    return EV["t"] + (wall_ns - EV["wall"]) / 1e9
-
-
 def maybe_frame():
     if not (args.record or STILLS) or t_sim + 1e-9 < ST["next_frame_t"]:
         return
@@ -864,43 +676,17 @@ def maybe_frame():
     ST["next_frame_t"] += 1.0 / FPS
 
 
-def emit_event():
-    if srv and not args.record:
-        render()  # fresh mast frame for the first snapshot, rendered before the event's wall stamp
-    p, yaw, _ = robot_pose()
-    EV["t"], EV["wall"] = t_sim, time.time_ns()
-    EV["msg"] = {
-        "type": "event",
-        "t_sim": round(t_sim, 4),
-        "t_wall_ns": EV["wall"],
-        "hazard": hazard_state(p, yaw, t_sim),
-        "time_to_impact_s": round(T_IMPACT - t_sim, 3),
-    }
-    if srv:
-        srv.broadcast(EV["msg"])
-    else:
-        blog({"dir": "out", "msg": EV["msg"], "note": "no server"})
-    log(f"EVENT t_sim={t_sim:.4f} time_to_impact_s={T_IMPACT - t_sim:.3f}")
-
-
 def emit_outcome():
     ST["outcome_sent"] = True
-    out = {
+    p, _yaw, _tilt = robot_pose()
+    outcome = {
         "type": "outcome",
         "t_sim": round(t_sim, 4),
         "collision": ST["contact_t"] is not None,
         "t_contact": ST["contact_t"],
         "min_gap_m": round(ST["min_gap"], 3),
         "max_force_n": round(ST["max_force"], 1),
-    }
-    if srv:
-        srv.broadcast(out)
-    else:
-        blog({"dir": "out", "msg": out, "note": "no server"})
-    p, _yaw, _tilt = robot_pose()
-    extra = {
-        **out,
-        "t_event": EV["t"],
+        "t_event": ST["t_event"],
         "t_hit_forklift": round(T_HIT, 4),
         "robot_final": [round(p[0], 3), round(p[1], 3), round(p[2], 3)],
         "robot_min_z": round(ST["min_z"], 3),
@@ -909,8 +695,8 @@ def emit_outcome():
         "landed_centres_xy": [round(v, 3) for v in ST["landed"]],
         "policy_err": POL["err"],
     }
-    json.dump(extra, open(os.path.join(OUT, "outcome.json"), "w"), indent=1)
-    log("OUTCOME " + json.dumps(extra))
+    json.dump(outcome, open(os.path.join(OUT, "outcome.json"), "w"), indent=1)
+    log("OUTCOME " + json.dumps(outcome))
 
 
 def local_reflex():
@@ -921,51 +707,31 @@ def local_reflex():
     ok = sorted((free[d] - ex[d], d) for d in DIRS if ex[d] is not None and free[d] > ex[d])
     ST["reflex_done"] = True
     if not ok:
-        blog({"dir": "reflex", "msg": {"escape": None, "free_m": free, "exit_m": ex}})
+        log(f"REFLEX t_sim={t_sim:.4f} escape=None free_m={free} exit_m={ex}")
         return
     d = ok[-1][1]
     dur = min(ex[d] + float(SHOT["reflex"]["margin_m"]), free[d] - 0.3)  # metres at 1.0 m/s, stop short of the rack
     MODE.clear()
     MODE.update(kind="evade", v=[*DIRS[d], 0.0], until=t_sim + dur)
-    blog({"dir": "reflex", "msg": {"escape": d, "until": round(t_sim + dur, 4), "free_m": free, "exit_m": ex}})
-    log(f"REFLEX t_sim={t_sim:.4f} escape={d} free_m={free} exit_m={ex}")
+    log(f"REFLEX t_sim={t_sim:.4f} escape={d} until={t_sim + dur:.4f} free_m={free} exit_m={ex}")
 
 
 # ---------------------------------------------------------------- main loop
 wall0 = time.time()
-CTRL = 4 * DT
 while t_sim < T_END - 1e-9:
-    if srv:
-        srv.poll()
-    if EV["msg"] is None and t_sim >= T_EVENT - 1e-9:
-        emit_event()
+    if ST["t_event"] is None and t_sim >= T_EVENT - 1e-9:
+        ST["t_event"] = t_sim
+        log(f"EVENT t_sim={t_sim:.4f}")
     if args.reflex and not ST.get("reflex_done") and t_sim >= T_EVENT + float(SHOT["reflex"]["latency_s"]) - 1e-9:
         local_reflex()
     if not ST["outcome_sent"] and t_sim >= T_OUTCOME - 1e-9:
         emit_outcome()
-    if srv and srv.queue:
-        item = srv.queue[0]
-        sock, msg = item[0], item[1]
-        tt = t_sim if EV["t"] is None or "t_wall_ns" not in msg else t_map(int(msg["t_wall_ns"]))
-        if item[2] is None:  # first look: is the sim already past the request's mapped time?
-            item[2] = round(t_sim - tt, 4) if t_sim > tt + 1e-9 else 0.0
-        if t_sim < tt - 1e-9:
-            physics_step()
-            maybe_frame()
-            continue
-        srv.queue.pop(0)
-        blog({"dir": "map", "id": msg.get("id"), "t_target": round(tt, 4), "late_s": item[2]})
-        apply_request(sock, msg, item[2])
-        continue
-    if EV["t"] is not None and t_sim + DT > t_map(time.time_ns()) + CTRL:
-        time.sleep(0.0005)
-        continue  # never run ahead of the wall mapping by more than one control step
     physics_step()
     maybe_frame()
 if not ST["outcome_sent"]:
     emit_outcome()
 pool.shutdown(wait=True)
-for fh in (TRACK, FR_IDX, BLOG, LOGF):
+for fh in (TRACK, FR_IDX, LOGF):
     if fh:
         fh.flush()
 sm = np.array(ST["step_ms"])
