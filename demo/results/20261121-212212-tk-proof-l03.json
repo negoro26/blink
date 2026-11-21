@@ -1,0 +1,83 @@
+{
+  "run": "20261121-212212-tk-proof-l03",
+  "mode": "proof",
+  "model": "scripted evade left at L = 0.3 s",
+  "reaction_ms": 300,
+  "outcome": "escaped",
+  "l_s": 0.300107536,
+  "event": {
+    "type": "event",
+    "t_sim": 40.5,
+    "t_wall_ns": 1795289006997782209,
+    "hazard": {
+      "kind": "forklift",
+      "x": 8.387,
+      "y": -0.187,
+      "vx": -0.999,
+      "vy": 0.039,
+      "time_to_impact_s": 2.377,
+      "exit_m": {
+        "front": 10.027,
+        "back": 2.996,
+        "left": 1.029,
+        "right": 0.752
+      },
+      "site_estop": false
+    },
+    "time_to_impact_s": 2.377,
+    "state": {
+      "t_sim": 40.5,
+      "pose": {
+        "x": 0.531,
+        "y": 11.772,
+        "yaw": 1.61
+      },
+      "vel": {
+        "vx": -0.021,
+        "vy": -0.014,
+        "wz": 0.023
+      },
+      "hazard": {
+        "kind": "forklift",
+        "x": 8.387,
+        "y": -0.187,
+        "vx": -0.999,
+        "vy": 0.039,
+        "time_to_impact_s": 2.377,
+        "exit_m": {
+          "front": 10.027,
+          "back": 2.996,
+          "left": 1.029,
+          "right": 0.752
+        },
+        "site_estop": false
+      },
+      "free_m": {
+        "front": null,
+        "back": null,
+        "left": 2.721,
+        "right": 0.586
+      }
+    }
+  },
+  "request": {
+    "id": 1,
+    "op": "evade",
+    "direction": "left",
+    "duration_ms": 1500,
+    "t_wall_ns": 1795289007297889745
+  },
+  "reply": {
+    "id": 1,
+    "applied_at_t_sim": 40.82,
+    "late_s": 0.0199
+  },
+  "outcome_msg": {
+    "type": "outcome",
+    "t_sim": 44.18,
+    "collision": false,
+    "t_contact": null,
+    "max_force_n": 0.0,
+    "min_gap_m": 0.541
+  }
+}
