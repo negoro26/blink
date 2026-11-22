@@ -1,0 +1,3939 @@
+{
+ "run": "20261122-024438-site-live-k3",
+ "mode": "live",
+ "brain": "kimi",
+ "model": "Kimi K3.1 Pro on Cerebras",
+ "model_id": "moonshotai-kimi-k3.1-pro-trial",
+ "effort": "high",
+ "session": "20261122-024438-site-live-k3",
+ "reaction_ms": 11350,
+ "tokens_per_s": 321.3,
+ "outcome": "saved",
+ "outcome_msg": {
+  "type": "outcome",
+  "t_sim": 132.62,
+  "collision": false,
+  "t_contact": null,
+  "max_force_n": 0.0,
+  "min_gap_m": 1.212,
+  "people": {
+   "worker1": {
+    "hit": false,
+    "t_contact": null,
+    "min_gap_m": 0.488
+   }
+  }
+ },
+ "l_s": [
+  11.3499
+ ],
+ "l_median_s": 11.3499,
+ "l_max_s": 11.3499,
+ "clock_offset_s": 0.0014,
+ "clock_rtt_s": 0.0119,
+ "warmup": {
+  "prompt": "Warm-up, no hazard: answer only OK.",
+  "session": "20261122-024438-site-live-k3",
+  "t_sent": 1795308359.0688238,
+  "t_first_chunk": 1795308359.4781544,
+  "text": "OK",
+  "error": null,
+  "t_done": 1795308370.6657841
+ },
+ "episodes": [
+  {
+   "brain": "kimi",
+   "event_t_wall_ns": 1795308447588835964,
+   "event_recv_ms": 44.9,
+   "l_s": 11.3499,
+   "decision": {
+    "tool": "site_estop",
+    "args": {
+     "vehicle": "forklift"
+    }
+   },
+   "applied_at_t_sim": 132.36,
+   "late_s": 0.0101,
+   "tool_calls": [
+    {
+     "tool": "site_estop",
+     "args": {
+      "vehicle": "forklift"
+     },
+     "wall_ns": 1795308458936930885,
+     "t_wall_ns": 1795308458938724859,
+     "reply": {
+      "vehicle": "forklift",
+      "applied_at_t_sim": 132.36,
+      "stops_at_t_sim": 132.61,
+      "late_s": 0.0101
+     },
+     "wall_ns_out": 1795308458949178508,
+     "t_from_event_s": 11.3499,
+     "duration_s": 0.0122
+    },
+    {
+     "tool": "site_alert",
+     "args": {
+      "person": "worker1",
+      "message": "Worker1, move left out of the forklift path now!"
+     },
+     "wall_ns": 1795308459026764864,
+     "t_wall_ns": 1795308459026775695,
+     "reply": {
+      "person": "worker1",
+      "applied_at_t_sim": 132.44,
+      "reaction_s": 1.5,
+      "moves_at_t_sim": 133.94,
+      "late_s": 0.0021
+     },
+     "wall_ns_out": 1795308459029162977,
+     "t_from_event_s": 11.4379,
+     "duration_s": 0.0024
+    },
+    {
+     "tool": "robot_dispatch",
+     "args": {
+      "robot": "anymal_d",
+      "x": 0.39,
+      "y": 6.5
+     },
+     "wall_ns": 1795308459200010978,
+     "t_wall_ns": 1795308459200020298,
+     "reply": {
+      "robot": "anymal_d",
+      "applied_at_t_sim": 132.62,
+      "target": [
+       0.39,
+       6.5
+      ],
+      "late_s": 0.0088
+     },
+     "wall_ns_out": 1795308459209145550,
+     "t_from_event_s": 11.6112,
+     "duration_s": 0.0091
+    },
+    {
+     "tool": "site_camera",
+     "args": {
+      "name": "chase"
+     },
+     "wall_ns": 1795308463890296688,
+     "t_wall_ns": 1795308463890303988,
+     "jpeg": "~/sim-runs/20261122-024438-site-live-k3/camera/1795308463927221811-chase.jpg",
+     "reply": {
+      "t_sim": 137.32,
+      "camera": "chase",
+      "late_s": 0.0185
+     },
+     "wall_ns_out": 1795308463927221811,
+     "t_from_event_s": 16.3015,
+     "duration_s": 0.0369
+    },
+    {
+     "tool": "incident_report",
+     "args": {
+      "text": "At t_sim 121.0, forklift was reversing toward stationary worker1 in the aisle, with predicted contact in 11.975 s. I issued the forklift e-stop (applied t_sim 132.36; stopped t_sim 132.61), alerted worker1 to move left out of its path (applied t_sim 132.44; movement due t_sim 133.94 after 1.5 s reaction), and dispatched anymal_d toward worker1 (applied t_sim 132.62; target 0.39, 6.5). The follow-up chase camera shows worker1 standing clear to the left of the stopped forklift, with anymal_d alongside; the worker is safe and no contact is visible."
+     },
+     "wall_ns": 1795308471118373520,
+     "t_wall_ns": 1795308471118381570,
+     "reply": {
+      "logged_at_t_sim": 144.54,
+      "late_s": 0.0105
+     },
+     "wall_ns_out": 1795308471129148204,
+     "t_from_event_s": 23.5295,
+     "duration_s": 0.0108
+    }
+   ],
+   "steps": [
+    {
+     "request_s": 3.9269,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 4.3459,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 4.846,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 5.1667,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 6.1668,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 6.5984,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 8.5985,
+     "first_token_s": 9.9776,
+     "tool_token_s": 11.3089,
+     "end_s": 11.3096,
+     "queue_time_s": 0.5325221150000001,
+     "prompt_time_s": 0.460650864,
+     "completion_time_s": 1.25869046,
+     "completion_tokens": 428,
+     "reasoning_tokens": 236,
+     "decode_tok_s": 321.3,
+     "tools": [
+      "robot__site_estop",
+      "robot__site_alert",
+      "robot__robot_dispatch"
+     ],
+     "status": 200,
+     "error": null
+    },
+    {
+     "request_s": 11.6491,
+     "first_token_s": 15.9171,
+     "tool_token_s": 16.2649,
+     "end_s": 16.2656,
+     "queue_time_s": 3.7521296239999997,
+     "prompt_time_s": 0.106539754,
+     "completion_time_s": 0.364862721,
+     "completion_tokens": 151,
+     "reasoning_tokens": 102,
+     "decode_tok_s": 433.2,
+     "tools": [
+      "robot__site_camera"
+     ],
+     "status": 200,
+     "error": null
+    },
+    {
+     "request_s": 16.4821,
+     "first_token_s": 22.6829,
+     "tool_token_s": 23.4953,
+     "end_s": 23.4958,
+     "queue_time_s": 5.588779768,
+     "prompt_time_s": 0.099932481,
+     "completion_time_s": 0.831102617,
+     "completion_tokens": 275,
+     "reasoning_tokens": 78,
+     "decode_tok_s": 338.3,
+     "tools": [
+      "robot__incident_report"
+     ],
+     "status": 200,
+     "error": null
+    },
+    {
+     "request_s": 23.6297,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 23.9014,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 24.4015,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 24.6508,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 25.6509,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 25.9315,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 27.9316,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 28.3089,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 31.309,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 31.6693,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 34.6694,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 34.9558,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 37.9559,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 38.2416,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 41.2417,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 41.519,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 44.5191,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 44.8989,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 46.3603,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 46.6369,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 47.1371,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 47.4586,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 48.4587,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 48.7807,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 50.7808,
+     "first_token_s": null,
+     "tool_token_s": null,
+     "end_s": 51.0432,
+     "queue_time_s": null,
+     "prompt_time_s": null,
+     "completion_time_s": null,
+     "completion_tokens": null,
+     "reasoning_tokens": null,
+     "decode_tok_s": null,
+     "tools": [],
+     "status": 429,
+     "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}"
+    },
+    {
+     "request_s": 54.0433,
+     "first_token_s": 58.3122,
+     "tool_token_s": null,
+     "end_s": 58.7223,
+     "queue_time_s": 0.009039597999999482,
+     "prompt_time_s": 3.732124782,
+     "completion_time_s": 0.476244497,
+     "completion_tokens": 147,
+     "reasoning_tokens": 123,
+     "decode_tok_s": 358.4,
+     "tools": [],
+     "status": 200,
+     "error": null
+    }
+   ],
+   "ttft_s": 9.9776,
+   "first_tool_token_s": 11.3089,
+   "prompt_tokens": 7115,
+   "cached_tokens": 6144,
+   "completion_tokens": 428,
+   "reasoning_tokens": 236,
+   "model_request_s": 8.5985,
+   "queue_time_s": 0.5325221150000001,
+   "prompt_time_s": 0.460650864,
+   "completion_time_s": 1.25869046,
+   "tokens_per_s": 321.3,
+   "reasoning": "I need respond event instructions AGENTS: at most one short sentence and every call danger one response parallel: estop forklift alert worker short spoken instruction dispatch robot toward person if can help. Do act now. Image forklift behind worker reversing toward? event says hazard yes. Should have tools. Could do parallel estop, alert, robot_dispatch to near worker coords. Alert instruction clear e.g. \"Worker1, step to your right, clear of the forklift path now!\" Should consider geometry shelves to right; worker at 0.39 y6.5, forklift at .393 y20.5 yaw1.571 reversing? y decreasing toward worker. Step left aisle away x perhaps -1? Frame worker right edge, aisle clear to left robot position. Tell \"Move left, out of the aisle\u2014forklift approaching!\" Robot dispatch to worker (0.39,6.5) perhaps helps. Should have every call in one response parallel. I can output one sentence \"Forklift reversing toward worker1; stopping it and clearing the worker now.\" then tools. Since tool response itself with text and parallel calls. Use multi_tool_use.parallel three calls.",
+   "said": "Forklift reversing toward worker1; stopping it and clearing the worker now.",
+   "model_calls": 20,
+   "refused_calls": 16,
+   "retry_s": 35.0852,
+   "turn": {
+    "prompt": "EVENT {\"t_sim\":121.0,\"time_to_contact_s\":11.975,\"person\":\"worker1\",\"alert_deadline_t_sim\":130.975,\"estop_deadline_t_sim\":132.845,\"deadline_t_sim\":132.845,\"deadline_s\":11.845,\"state\":{\"t_sim\":121.0,\"vehicles\":[{\"id\":\"forklift\",\"x\":0.393,\"y\":20.5,\"yaw\":1.571,\"speed_mps\":1.0,\"reversing\":true,\"estop\":false,\"estop_available\":true,\"stops_at_t_sim\":135.0}],\"people\":[{\"id\":\"worker1\",\"x\":0.39,\"y\":6.5,\"yaw\":0.0,\"speed_mps\":0.0,\"time_to_contact_s\":11.975,\"alert_deadline_s\":9.975,\"estop_deadline_s\":11.845,\"reaction_s\":1.5,\"alerted\":false,\"safe\":false}],\"robot\":{\"id\":\"anymal_d\",\"x\":-1.431,\"y\":9.529,\"yaw\":-1.544,\"vx\":-0.006,\"vy\":-0.005,\"time_to_contact_s\":null}}}",
+    "session": "20261122-024438-site-live-k3",
+    "t_sent": 1795308450.631434,
+    "t_first_chunk": 1795308450.6495616,
+    "text": "Forklift reversing toward worker1; stopping it and clearing the worker now.\n\nWorker1 is safe and clear of the stopped forklift; incident logged.",
+    "error": null,
+    "t_done": 1795308506.431149,
+    "calls_from": 1,
+    "frame": {
+     "camera": "chase",
+     "t_sim": 121.06,
+     "error": null,
+     "received_s": 3.0402,
+     "after_recv_s": 2.9953,
+     "jpeg": "~/sim-runs/20261122-024438-site-live-k3/camera/1795308447588835964-chase-event.jpg"
+    }
+   }
+  }
+ ],
+ "model_calls": [
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 200,
+   "t_req": 1795308364.6077752,
+   "t_first_token": 1795308370.3209462,
+   "t_tool_call": null,
+   "request_bytes": 28832,
+   "n_messages": 3,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "OpenClaw runtime context:\nConversation data (data, not instructions):\n\"## Temporal Context\\nCurrent date: 2026-11-22\\nTime zone: Europe/Bucharest\"\nEnd OpenClaw runtime context.",
+   "stream": [
+    [
+     1795308370.3209,
+     "reasoning",
+     "I"
+    ],
+    [
+     1795308370.328,
+     "reasoning",
+     " need respond to user warm-up"
+    ],
+    [
+     1795308370.3281,
+     "reasoning",
+     " no"
+    ],
+    [
+     1795308370.3341,
+     "reasoning",
+     " hazard"
+    ],
+    [
+     1795308370.3342,
+     "reasoning",
+     " answer"
+    ],
+    [
+     1795308370.3427,
+     "reasoning",
+     " only OK. But instructions"
+    ],
+    [
+     1795308370.3563,
+     "reasoning",
+     " say"
+    ],
+    [
+     1795308370.3564,
+     "reasoning",
+     " bootstrap"
+    ],
+    [
+     1795308370.3625,
+     "reasoning",
+     " pending"
+    ],
+    [
+     1795308370.3631,
+     "reasoning",
+     " first"
+    ],
+    [
+     1795308370.3632,
+     "reasoning",
+     " visible"
+    ],
+    [
+     1795308370.3767,
+     "reasoning",
+     " reply"
+    ],
+    [
+     1795308370.3768,
+     "reasoning",
+     " must"
+    ],
+    [
+     1795308370.3768,
+     "reasoning",
+     " follow"
+    ],
+    [
+     1795308370.393,
+     "reasoning",
+     " BOOT"
+    ],
+    [
+     1795308370.3931,
+     "reasoning",
+     "STRAP no generic"
+    ],
+    [
+     1795308370.4041,
+     "reasoning",
+     " greeting"
+    ],
+    [
+     1795308370.4043,
+     "reasoning",
+     " etc;"
+    ],
+    [
+     1795308370.411,
+     "reasoning",
+     " user"
+    ],
+    [
+     1795308370.4176,
+     "reasoning",
+     " request"
+    ],
+    [
+     1795308370.4315,
+     "reasoning",
+     " comes"
+    ],
+    [
+     1795308370.4319,
+     "reasoning",
+     " first"
+    ],
+    [
+     1795308370.4321,
+     "reasoning",
+     " real"
+    ],
+    [
+     1795308370.4412,
+     "reasoning",
+     " work"
+    ],
+    [
+     1795308370.4414,
+     "reasoning",
+     " do"
+    ],
+    [
+     1795308370.4415,
+     "reasoning",
+     " completely"
+    ],
+    [
+     1795308370.4642,
+     "reasoning",
+     " and"
+    ],
+    [
+     1795308370.4644,
+     "reasoning",
+     " reply"
+    ],
+    [
+     1795308370.4645,
+     "reasoning",
+     " result"
+    ],
+    [
+     1795308370.4646,
+     "reasoning",
+     ". This is"
+    ],
+    [
+     1795308370.4656,
+     "reasoning",
+     " simple"
+    ],
+    [
+     1795308370.483,
+     "reasoning",
+     " answer"
+    ],
+    [
+     1795308370.4838,
+     "reasoning",
+     " only"
+    ],
+    [
+     1795308370.4839,
+     "reasoning",
+     " OK"
+    ],
+    [
+     1795308370.4929,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308370.4931,
+     "reasoning",
+     " Should consider BOOTSTRAP says no generic greeting"
+    ],
+    [
+     1795308370.4947,
+     "reasoning",
+     " normal"
+    ],
+    [
+     1795308370.5023,
+     "reasoning",
+     " reply before handling"
+    ],
+    [
+     1795308370.5024,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308370.5159,
+     "reasoning",
+     " user explicitly"
+    ],
+    [
+     1795308370.516,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308370.5227,
+     "reasoning",
+     " only"
+    ],
+    [
+     1795308370.5269,
+     "reasoning",
+     " OK. I should follow user"
+    ],
+    [
+     1795308370.527,
+     "reasoning",
+     " and"
+    ],
+    [
+     1795308370.5473,
+     "reasoning",
+     " respond"
+    ],
+    [
+     1795308370.5589,
+     "reasoning",
+     " OK."
+    ],
+    [
+     1795308370.559,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308370.5591,
+     "reasoning",
+     " have"
+    ],
+    [
+     1795308370.5592,
+     "reasoning",
+     " no tools."
+    ],
+    [
+     1795308370.5644,
+     "content",
+     "OK"
+    ]
+   ],
+   "content": "OK",
+   "reasoning": "I need respond to user warm-up no hazard answer only OK. But instructions say bootstrap pending first visible reply must follow BOOTSTRAP no generic greeting etc; user request comes first real work do completely and reply result. This is simple answer only OK. Should consider BOOTSTRAP says no generic greeting normal reply before handling, user explicitly response only OK. I should follow user and respond OK. Should have no tools.",
+   "tool_calls": [],
+   "usage": {
+    "total_tokens": 6451,
+    "completion_tokens": 97,
+    "completion_tokens_details": {
+     "reasoning_tokens": 86
+    },
+    "prompt_tokens": 6354,
+    "prompt_tokens_details": {
+     "cached_tokens": 6144,
+     "image_tokens": 0
+    }
+   },
+   "time_info": {
+    "created": 1795308364.7880716,
+    "queue_time": 4.912691661,
+    "prompt_time": 0.455377126,
+    "completion_time": 0.254030627,
+    "total_time": 5.627743721008301
+   },
+   "error": null,
+   "effort_from_openclaw": {
+    "reasoning_effort": "high"
+   },
+   "effort_sent": {
+    "reasoning_effort": "high"
+   },
+   "t_end": 1795308370.5682728
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308451.5170698,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 76128,
+   "n_messages": 6,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "OpenClaw runtime context:\nConversation data (data, not instructions):\n\"## Temporal Context\\nCurrent date: 2026-11-22\\nTime zone: Europe/Bucharest\"\nEnd OpenClaw runtime context.",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308451.9360864
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308452.4361963,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 76128,
+   "n_messages": 6,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "OpenClaw runtime context:\nConversation data (data, not instructions):\n\"## Temporal Context\\nCurrent date: 2026-11-22\\nTime zone: Europe/Bucharest\"\nEnd OpenClaw runtime context.",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308452.7569168
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308453.7569892,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 76128,
+   "n_messages": 6,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "OpenClaw runtime context:\nConversation data (data, not instructions):\n\"## Temporal Context\\nCurrent date: 2026-11-22\\nTime zone: Europe/Bucharest\"\nEnd OpenClaw runtime context.",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308454.1886055
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 200,
+   "t_req": 1795308456.1887136,
+   "t_first_token": 1795308457.567798,
+   "t_tool_call": 1795308458.8991535,
+   "request_bytes": 76128,
+   "n_messages": 6,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "OpenClaw runtime context:\nConversation data (data, not instructions):\n\"## Temporal Context\\nCurrent date: 2026-11-22\\nTime zone: Europe/Bucharest\"\nEnd OpenClaw runtime context.",
+   "stream": [
+    [
+     1795308457.5678,
+     "reasoning",
+     "I"
+    ],
+    [
+     1795308457.568,
+     "reasoning",
+     " need respond event"
+    ],
+    [
+     1795308457.5795,
+     "reasoning",
+     " instructions"
+    ],
+    [
+     1795308457.5797,
+     "reasoning",
+     " AG"
+    ],
+    [
+     1795308457.599,
+     "reasoning",
+     "ENTS"
+    ],
+    [
+     1795308457.6,
+     "reasoning",
+     ":"
+    ],
+    [
+     1795308457.6009,
+     "reasoning",
+     " at"
+    ],
+    [
+     1795308457.601,
+     "reasoning",
+     " most"
+    ],
+    [
+     1795308457.6168,
+     "reasoning",
+     " one"
+    ],
+    [
+     1795308457.6171,
+     "reasoning",
+     " short"
+    ],
+    [
+     1795308457.6301,
+     "reasoning",
+     " sentence and every call danger one"
+    ],
+    [
+     1795308457.6303,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308457.6304,
+     "reasoning",
+     " parallel"
+    ],
+    [
+     1795308457.6309,
+     "reasoning",
+     ":"
+    ],
+    [
+     1795308457.6312,
+     "reasoning",
+     " est"
+    ],
+    [
+     1795308457.6464,
+     "reasoning",
+     "op"
+    ],
+    [
+     1795308457.6466,
+     "reasoning",
+     " forklift"
+    ],
+    [
+     1795308457.6649,
+     "reasoning",
+     " alert"
+    ],
+    [
+     1795308457.6651,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308457.6651,
+     "reasoning",
+     " short"
+    ],
+    [
+     1795308457.6759,
+     "reasoning",
+     " spoken"
+    ],
+    [
+     1795308457.676,
+     "reasoning",
+     " instruction"
+    ],
+    [
+     1795308457.6812,
+     "reasoning",
+     " dispatch"
+    ],
+    [
+     1795308457.6813,
+     "reasoning",
+     " robot"
+    ],
+    [
+     1795308457.6813,
+     "reasoning",
+     " toward"
+    ],
+    [
+     1795308457.6813,
+     "reasoning",
+     " person"
+    ],
+    [
+     1795308457.6819,
+     "reasoning",
+     " if"
+    ],
+    [
+     1795308457.6864,
+     "reasoning",
+     " can help. Do"
+    ],
+    [
+     1795308457.7066,
+     "reasoning",
+     " act now"
+    ],
+    [
+     1795308457.7067,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308457.7068,
+     "reasoning",
+     " Image"
+    ],
+    [
+     1795308457.713,
+     "reasoning",
+     " forklift"
+    ],
+    [
+     1795308457.7193,
+     "reasoning",
+     " behind"
+    ],
+    [
+     1795308457.7285,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308457.7394,
+     "reasoning",
+     " reversing"
+    ],
+    [
+     1795308457.7508,
+     "reasoning",
+     " toward"
+    ],
+    [
+     1795308457.8753,
+     "reasoning",
+     "?"
+    ],
+    [
+     1795308457.8754,
+     "reasoning",
+     " event"
+    ],
+    [
+     1795308457.8756,
+     "reasoning",
+     " says"
+    ],
+    [
+     1795308457.8757,
+     "reasoning",
+     " hazard"
+    ],
+    [
+     1795308457.8758,
+     "reasoning",
+     " yes"
+    ],
+    [
+     1795308457.8758,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308457.8759,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308457.8759,
+     "reasoning",
+     " have"
+    ],
+    [
+     1795308457.876,
+     "reasoning",
+     " tools"
+    ],
+    [
+     1795308457.876,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308457.876,
+     "reasoning",
+     " Could"
+    ],
+    [
+     1795308457.8761,
+     "reasoning",
+     " do"
+    ],
+    [
+     1795308457.8761,
+     "reasoning",
+     " parallel"
+    ],
+    [
+     1795308457.8762,
+     "reasoning",
+     " est"
+    ],
+    [
+     1795308457.8762,
+     "reasoning",
+     "op"
+    ],
+    [
+     1795308457.8762,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308457.8763,
+     "reasoning",
+     " alert"
+    ],
+    [
+     1795308457.8763,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308457.8764,
+     "reasoning",
+     " robot_dispatch"
+    ],
+    [
+     1795308457.8764,
+     "reasoning",
+     " to near"
+    ],
+    [
+     1795308457.8764,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308457.8764,
+     "reasoning",
+     " coords"
+    ],
+    [
+     1795308457.8764,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308457.8765,
+     "reasoning",
+     " Alert instruction"
+    ],
+    [
+     1795308457.8765,
+     "reasoning",
+     " clear"
+    ],
+    [
+     1795308457.8765,
+     "reasoning",
+     " e"
+    ],
+    [
+     1795308457.8765,
+     "reasoning",
+     ".g"
+    ],
+    [
+     1795308457.8766,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308457.8766,
+     "reasoning",
+     " \""
+    ],
+    [
+     1795308457.8904,
+     "reasoning",
+     "Worker"
+    ],
+    [
+     1795308457.897,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308457.9089,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308457.909,
+     "reasoning",
+     " step"
+    ],
+    [
+     1795308457.9091,
+     "reasoning",
+     " to"
+    ],
+    [
+     1795308457.9156,
+     "reasoning",
+     " your"
+    ],
+    [
+     1795308457.9286,
+     "reasoning",
+     " right"
+    ],
+    [
+     1795308457.9289,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308457.936,
+     "reasoning",
+     " clear"
+    ],
+    [
+     1795308457.9465,
+     "reasoning",
+     " of"
+    ],
+    [
+     1795308457.9591,
+     "reasoning",
+     " the"
+    ],
+    [
+     1795308457.9592,
+     "reasoning",
+     " forklift"
+    ],
+    [
+     1795308457.9593,
+     "reasoning",
+     " path"
+    ],
+    [
+     1795308457.9689,
+     "reasoning",
+     " now"
+    ],
+    [
+     1795308457.9721,
+     "reasoning",
+     "!\""
+    ],
+    [
+     1795308457.9854,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308457.9856,
+     "reasoning",
+     " consider"
+    ],
+    [
+     1795308458.0039,
+     "reasoning",
+     " geometry"
+    ],
+    [
+     1795308458.0101,
+     "reasoning",
+     " shelves"
+    ],
+    [
+     1795308458.0102,
+     "reasoning",
+     " to"
+    ],
+    [
+     1795308458.0184,
+     "reasoning",
+     " right"
+    ],
+    [
+     1795308458.0185,
+     "reasoning",
+     ";"
+    ],
+    [
+     1795308458.0186,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308458.0268,
+     "reasoning",
+     " at"
+    ],
+    [
+     1795308458.0269,
+     "reasoning",
+     " "
+    ],
+    [
+     1795308458.027,
+     "reasoning",
+     "0"
+    ],
+    [
+     1795308458.0275,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.0293,
+     "reasoning",
+     "39"
+    ],
+    [
+     1795308458.0294,
+     "reasoning",
+     " y"
+    ],
+    [
+     1795308458.0362,
+     "reasoning",
+     "6"
+    ],
+    [
+     1795308458.0363,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.0364,
+     "reasoning",
+     "5"
+    ],
+    [
+     1795308458.0431,
+     "reasoning",
+     ", forklift at .393 y20.5 yaw"
+    ],
+    [
+     1795308458.0557,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308458.0573,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.0581,
+     "reasoning",
+     "571"
+    ],
+    [
+     1795308458.0586,
+     "reasoning",
+     " reversing?"
+    ],
+    [
+     1795308458.0653,
+     "reasoning",
+     " y"
+    ],
+    [
+     1795308458.0718,
+     "reasoning",
+     " decreasing"
+    ],
+    [
+     1795308458.0794,
+     "reasoning",
+     " toward"
+    ],
+    [
+     1795308458.0855,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308458.0857,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.092,
+     "reasoning",
+     " Step"
+    ],
+    [
+     1795308458.1108,
+     "reasoning",
+     " left"
+    ],
+    [
+     1795308458.1177,
+     "reasoning",
+     " aisle"
+    ],
+    [
+     1795308458.1179,
+     "reasoning",
+     " away"
+    ],
+    [
+     1795308458.1606,
+     "reasoning",
+     " x"
+    ],
+    [
+     1795308458.1607,
+     "reasoning",
+     " perhaps"
+    ],
+    [
+     1795308458.1608,
+     "reasoning",
+     " -"
+    ],
+    [
+     1795308458.1617,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308458.1619,
+     "reasoning",
+     "?"
+    ],
+    [
+     1795308458.181,
+     "reasoning",
+     " Frame"
+    ],
+    [
+     1795308458.1812,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308458.1812,
+     "reasoning",
+     " right"
+    ],
+    [
+     1795308458.1921,
+     "reasoning",
+     " edge"
+    ],
+    [
+     1795308458.2007,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308458.2094,
+     "reasoning",
+     " aisle"
+    ],
+    [
+     1795308458.2186,
+     "reasoning",
+     " clear"
+    ],
+    [
+     1795308458.2334,
+     "reasoning",
+     " to"
+    ],
+    [
+     1795308458.249,
+     "reasoning",
+     " left"
+    ],
+    [
+     1795308458.2534,
+     "reasoning",
+     " robot"
+    ],
+    [
+     1795308458.2534,
+     "reasoning",
+     " position"
+    ],
+    [
+     1795308458.2535,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.2602,
+     "reasoning",
+     " Tell"
+    ],
+    [
+     1795308458.27,
+     "reasoning",
+     " \""
+    ],
+    [
+     1795308458.2702,
+     "reasoning",
+     "Move"
+    ],
+    [
+     1795308458.2848,
+     "reasoning",
+     " left"
+    ],
+    [
+     1795308458.2849,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308458.2857,
+     "reasoning",
+     " out"
+    ],
+    [
+     1795308458.3058,
+     "reasoning",
+     " of"
+    ],
+    [
+     1795308458.306,
+     "reasoning",
+     " the"
+    ],
+    [
+     1795308458.3061,
+     "reasoning",
+     " aisle"
+    ],
+    [
+     1795308458.3163,
+     "reasoning",
+     "\u2014"
+    ],
+    [
+     1795308458.3277,
+     "reasoning",
+     "fork"
+    ],
+    [
+     1795308458.3279,
+     "reasoning",
+     "lift"
+    ],
+    [
+     1795308458.3279,
+     "reasoning",
+     " approaching"
+    ],
+    [
+     1795308458.3403,
+     "reasoning",
+     "!\""
+    ],
+    [
+     1795308458.3405,
+     "reasoning",
+     " Robot"
+    ],
+    [
+     1795308458.3883,
+     "reasoning",
+     " dispatch"
+    ],
+    [
+     1795308458.3884,
+     "reasoning",
+     " to"
+    ],
+    [
+     1795308458.3884,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308458.3884,
+     "reasoning",
+     " ("
+    ],
+    [
+     1795308458.3885,
+     "reasoning",
+     "0"
+    ],
+    [
+     1795308458.3885,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.3885,
+     "reasoning",
+     "39"
+    ],
+    [
+     1795308458.3885,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308458.3885,
+     "reasoning",
+     "6"
+    ],
+    [
+     1795308458.3885,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.3886,
+     "reasoning",
+     "5"
+    ],
+    [
+     1795308458.3886,
+     "reasoning",
+     ")"
+    ],
+    [
+     1795308458.3886,
+     "reasoning",
+     " perhaps"
+    ],
+    [
+     1795308458.3886,
+     "reasoning",
+     " helps"
+    ],
+    [
+     1795308458.3886,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.3895,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308458.39,
+     "reasoning",
+     " have"
+    ],
+    [
+     1795308458.3907,
+     "reasoning",
+     " every"
+    ],
+    [
+     1795308458.3987,
+     "reasoning",
+     " call"
+    ],
+    [
+     1795308458.3988,
+     "reasoning",
+     " in"
+    ],
+    [
+     1795308458.4143,
+     "reasoning",
+     " one"
+    ],
+    [
+     1795308458.4144,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308458.4144,
+     "reasoning",
+     " parallel"
+    ],
+    [
+     1795308458.4145,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.4148,
+     "reasoning",
+     " I"
+    ],
+    [
+     1795308458.4148,
+     "reasoning",
+     " can"
+    ],
+    [
+     1795308458.4229,
+     "reasoning",
+     " output"
+    ],
+    [
+     1795308458.4348,
+     "reasoning",
+     " one"
+    ],
+    [
+     1795308458.4349,
+     "reasoning",
+     " sentence"
+    ],
+    [
+     1795308458.435,
+     "reasoning",
+     " \""
+    ],
+    [
+     1795308458.4497,
+     "reasoning",
+     "Fork"
+    ],
+    [
+     1795308458.4556,
+     "reasoning",
+     "lift"
+    ],
+    [
+     1795308458.4558,
+     "reasoning",
+     " reversing"
+    ],
+    [
+     1795308458.4562,
+     "reasoning",
+     " toward"
+    ],
+    [
+     1795308458.4563,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308458.4564,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308458.4564,
+     "reasoning",
+     ";"
+    ],
+    [
+     1795308458.4568,
+     "reasoning",
+     " stopping"
+    ],
+    [
+     1795308458.4654,
+     "reasoning",
+     " it"
+    ],
+    [
+     1795308458.4655,
+     "reasoning",
+     " and"
+    ],
+    [
+     1795308458.4757,
+     "reasoning",
+     " clearing"
+    ],
+    [
+     1795308458.4861,
+     "reasoning",
+     " the"
+    ],
+    [
+     1795308458.4862,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308458.503,
+     "reasoning",
+     " now"
+    ],
+    [
+     1795308458.5076,
+     "reasoning",
+     ".\""
+    ],
+    [
+     1795308458.5078,
+     "reasoning",
+     " then"
+    ],
+    [
+     1795308458.5079,
+     "reasoning",
+     " tools"
+    ],
+    [
+     1795308458.5079,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.5188,
+     "reasoning",
+     " Since tool"
+    ],
+    [
+     1795308458.5189,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308458.519,
+     "reasoning",
+     " itself"
+    ],
+    [
+     1795308458.5258,
+     "reasoning",
+     " with text"
+    ],
+    [
+     1795308458.5259,
+     "reasoning",
+     " and"
+    ],
+    [
+     1795308458.5347,
+     "reasoning",
+     " parallel calls. Use multi_tool"
+    ],
+    [
+     1795308458.5471,
+     "reasoning",
+     "_use"
+    ],
+    [
+     1795308458.5472,
+     "reasoning",
+     ".parallel"
+    ],
+    [
+     1795308458.5547,
+     "reasoning",
+     " three"
+    ],
+    [
+     1795308458.5548,
+     "reasoning",
+     " calls"
+    ],
+    [
+     1795308458.5932,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308458.5933,
+     "content",
+     "Fork"
+    ],
+    [
+     1795308458.5934,
+     "content",
+     "lift"
+    ],
+    [
+     1795308458.5934,
+     "content",
+     " reversing"
+    ],
+    [
+     1795308458.5935,
+     "content",
+     " toward"
+    ],
+    [
+     1795308458.5935,
+     "content",
+     " worker1; stopping it and"
+    ],
+    [
+     1795308458.5936,
+     "content",
+     " clearing"
+    ],
+    [
+     1795308458.5936,
+     "content",
+     " the worker now."
+    ],
+    [
+     1795308458.8992,
+     "tool",
+     "robot__site_estop"
+    ],
+    [
+     1795308458.8992,
+     "args",
+     "{\"vehicle\": \"forklift\"}"
+    ],
+    [
+     1795308458.8992,
+     "tool",
+     "robot__site_alert"
+    ],
+    [
+     1795308458.8992,
+     "args",
+     "{\"person\": \"worker1\", \"message\": \"Worker1, move left out of the forklift path now!\"}"
+    ],
+    [
+     1795308458.8992,
+     "tool",
+     "robot__robot_dispatch"
+    ],
+    [
+     1795308458.8992,
+     "args",
+     "{\"robot\": \"anymal_d\", \"x\": 0.39, \"y\": 6.5}"
+    ]
+   ],
+   "content": "Forklift reversing toward worker1; stopping it and clearing the worker now.",
+   "reasoning": "I need respond event instructions AGENTS: at most one short sentence and every call danger one response parallel: estop forklift alert worker short spoken instruction dispatch robot toward person if can help. Do act now. Image forklift behind worker reversing toward? event says hazard yes. Should have tools. Could do parallel estop, alert, robot_dispatch to near worker coords. Alert instruction clear e.g. \"Worker1, step to your right, clear of the forklift path now!\" Should consider geometry shelves to right; worker at 0.39 y6.5, forklift at .393 y20.5 yaw1.571 reversing? y decreasing toward worker. Step left aisle away x perhaps -1? Frame worker right edge, aisle clear to left robot position. Tell \"Move left, out of the aisle\u2014forklift approaching!\" Robot dispatch to worker (0.39,6.5) perhaps helps. Should have every call in one response parallel. I can output one sentence \"Forklift reversing toward worker1; stopping it and clearing the worker now.\" then tools. Since tool response itself with text and parallel calls. Use multi_tool_use.parallel three calls.",
+   "tool_calls": [
+    {
+     "name": "robot__site_estop",
+     "arguments": "{\"vehicle\": \"forklift\"}"
+    },
+    {
+     "name": "robot__site_alert",
+     "arguments": "{\"person\": \"worker1\", \"message\": \"Worker1, move left out of the forklift path now!\"}"
+    },
+    {
+     "name": "robot__robot_dispatch",
+     "arguments": "{\"robot\": \"anymal_d\", \"x\": 0.39, \"y\": 6.5}"
+    }
+   ],
+   "usage": {
+    "total_tokens": 7543,
+    "completion_tokens": 428,
+    "completion_tokens_details": {
+     "reasoning_tokens": 236
+    },
+    "prompt_tokens": 7115,
+    "prompt_tokens_details": {
+     "cached_tokens": 6144,
+     "image_tokens": 299
+    }
+   },
+   "time_info": {
+    "created": 1795308456.3954248,
+    "queue_time": 0.5325221150000001,
+    "prompt_time": 0.460650864,
+    "completion_time": 1.25869046,
+    "total_time": 2.2569692134857178
+   },
+   "error": null,
+   "effort_from_openclaw": {
+    "reasoning_effort": "high"
+   },
+   "effort_sent": {
+    "reasoning_effort": "high"
+   },
+   "t_end": 1795308458.8997982
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 200,
+   "t_req": 1795308459.2393112,
+   "t_first_token": 1795308463.5072706,
+   "t_tool_call": 1795308463.8550735,
+   "request_bytes": 78340,
+   "n_messages": 10,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"robot\": \"anymal_d\", \"applied_at_t_sim\": 132.62, \"target\": [0.39, 6.5], \"late_s\": 0.0088}",
+   "stream": [
+    [
+     1795308463.5073,
+     "reasoning",
+     "O"
+    ],
+    [
+     1795308463.5075,
+     "reasoning",
+     "ops"
+    ],
+    [
+     1795308463.5076,
+     "reasoning",
+     " tools"
+    ],
+    [
+     1795308463.8149,
+     "reasoning",
+     " late"
+    ],
+    [
+     1795308463.8151,
+     "reasoning",
+     "?"
+    ],
+    [
+     1795308463.8152,
+     "reasoning",
+     " applied"
+    ],
+    [
+     1795308463.8153,
+     "reasoning",
+     " est"
+    ],
+    [
+     1795308463.8154,
+     "reasoning",
+     "op"
+    ],
+    [
+     1795308463.8155,
+     "reasoning",
+     " at"
+    ],
+    [
+     1795308463.8155,
+     "reasoning",
+     "132"
+    ],
+    [
+     1795308463.8156,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308463.8157,
+     "reasoning",
+     "36"
+    ],
+    [
+     1795308463.8157,
+     "reasoning",
+     " before"
+    ],
+    [
+     1795308463.8158,
+     "reasoning",
+     " deadline"
+    ],
+    [
+     1795308463.8158,
+     "reasoning",
+     " "
+    ],
+    [
+     1795308463.8158,
+     "reasoning",
+     "132"
+    ],
+    [
+     1795308463.8159,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308463.8159,
+     "reasoning",
+     "845"
+    ],
+    [
+     1795308463.816,
+     "reasoning",
+     ", stops132"
+    ],
+    [
+     1795308463.816,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308463.816,
+     "reasoning",
+     "61"
+    ],
+    [
+     1795308463.8161,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308463.8161,
+     "reasoning",
+     " alert132."
+    ],
+    [
+     1795308463.8161,
+     "reasoning",
+     "44"
+    ],
+    [
+     1795308463.8162,
+     "reasoning",
+     " before deadline130."
+    ],
+    [
+     1795308463.8162,
+     "reasoning",
+     "975"
+    ],
+    [
+     1795308463.8163,
+     "reasoning",
+     "? Late"
+    ],
+    [
+     1795308463.8163,
+     "reasoning",
+     "_s"
+    ],
+    [
+     1795308463.8163,
+     "reasoning",
+     " "
+    ],
+    [
+     1795308463.8164,
+     "reasoning",
+     "0"
+    ],
+    [
+     1795308463.8164,
+     "reasoning",
+     ".0021 weird deadline"
+    ],
+    [
+     1795308463.8164,
+     "reasoning",
+     "?"
+    ],
+    [
+     1795308463.8165,
+     "reasoning",
+     " Event"
+    ],
+    [
+     1795308463.8165,
+     "reasoning",
+     " deadline"
+    ],
+    [
+     1795308463.8166,
+     "reasoning",
+     " at"
+    ],
+    [
+     1795308463.8166,
+     "reasoning",
+     "130"
+    ],
+    [
+     1795308463.8166,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308463.8167,
+     "reasoning",
+     "975"
+    ],
+    [
+     1795308463.8167,
+     "reasoning",
+     " but"
+    ],
+    [
+     1795308463.8167,
+     "reasoning",
+     " applied132."
+    ],
+    [
+     1795308463.8168,
+     "reasoning",
+     "44"
+    ],
+    [
+     1795308463.8168,
+     "reasoning",
+     " >"
+    ],
+    [
+     1795308463.8169,
+     "reasoning",
+     "130.975, yet late"
+    ],
+    [
+     1795308463.8169,
+     "reasoning",
+     "_s"
+    ],
+    [
+     1795308463.817,
+     "reasoning",
+     " ."
+    ],
+    [
+     1795308463.817,
+     "reasoning",
+     "002"
+    ],
+    [
+     1795308463.8171,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308463.8171,
+     "reasoning",
+     " indicates perhaps tool runtime overhead"
+    ],
+    [
+     1795308463.8172,
+     "reasoning",
+     " and"
+    ],
+    [
+     1795308463.8172,
+     "reasoning",
+     " late"
+    ],
+    [
+     1795308463.8172,
+     "reasoning",
+     " relative"
+    ],
+    [
+     1795308463.8173,
+     "reasoning",
+     " contact"
+    ],
+    [
+     1795308463.8173,
+     "reasoning",
+     "?"
+    ],
+    [
+     1795308463.8174,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308463.8174,
+     "reasoning",
+     " inspect"
+    ],
+    [
+     1795308463.8174,
+     "reasoning",
+     " camera"
+    ],
+    [
+     1795308463.8175,
+     "reasoning",
+     " and"
+    ],
+    [
+     1795308463.8175,
+     "reasoning",
+     " incident"
+    ],
+    [
+     1795308463.8175,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308463.8176,
+     "reasoning",
+     " Must"
+    ],
+    [
+     1795308463.8176,
+     "reasoning",
+     " follow"
+    ],
+    [
+     1795308463.8177,
+     "reasoning",
+     " AG"
+    ],
+    [
+     1795308463.8177,
+     "reasoning",
+     "ENTS"
+    ],
+    [
+     1795308463.8177,
+     "reasoning",
+     " after"
+    ],
+    [
+     1795308463.8178,
+     "reasoning",
+     " replies look camera then file incident report. Use site"
+    ],
+    [
+     1795308463.8212,
+     "reasoning",
+     "_camera."
+    ],
+    [
+     1795308463.8551,
+     "tool",
+     "robot__site_camera"
+    ],
+    [
+     1795308463.8551,
+     "args",
+     "{\"name\": \"chase\"}"
+    ]
+   ],
+   "content": "",
+   "reasoning": "Oops tools late? applied estop at132.36 before deadline 132.845, stops132.61. alert132.44 before deadline130.975? Late_s 0.0021 weird deadline? Event deadline at130.975 but applied132.44 >130.975, yet late_s .0021 indicates perhaps tool runtime overhead and late relative contact? Should inspect camera and incident. Must follow AGENTS after replies look camera then file incident report. Use site_camera.",
+   "tool_calls": [
+    {
+     "name": "robot__site_camera",
+     "arguments": "{\"name\": \"chase\"}"
+    }
+   ],
+   "usage": {
+    "total_tokens": 7903,
+    "completion_tokens": 151,
+    "completion_tokens_details": {
+     "reasoning_tokens": 102
+    },
+    "prompt_tokens": 7752,
+    "prompt_tokens_details": {
+     "cached_tokens": 6144,
+     "image_tokens": 299
+    }
+   },
+   "time_info": {
+    "created": 1795308459.474797,
+    "queue_time": 3.7521296239999997,
+    "prompt_time": 0.106539754,
+    "completion_time": 0.364862721,
+    "total_time": 4.22624135017395
+   },
+   "error": null,
+   "effort_from_openclaw": {
+    "reasoning_effort": "high"
+   },
+   "effort_sent": {
+    "reasoning_effort": "high"
+   },
+   "t_end": 1795308463.8558314
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 200,
+   "t_req": 1795308464.0723164,
+   "t_first_token": 1795308470.2731044,
+   "t_tool_call": 1795308471.0854802,
+   "request_bytes": 128297,
+   "n_messages": 13,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": [
+    {
+     "type": "text",
+     "text": "Image(s) from tool result #1 (robot__site_camera):"
+    },
+    {
+     "type": "image_url",
+     "image": "data:image/jpeg;base64",
+     "base64_chars": 49092
+    }
+   ],
+   "stream": [
+    [
+     1795308470.2731,
+     "reasoning",
+     "Camera"
+    ],
+    [
+     1795308470.2733,
+     "reasoning",
+     " shows"
+    ],
+    [
+     1795308470.2734,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308470.2735,
+     "reasoning",
+     " moved"
+    ],
+    [
+     1795308470.2736,
+     "reasoning",
+     " left"
+    ],
+    [
+     1795308470.2737,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308470.2737,
+     "reasoning",
+     " forklift"
+    ],
+    [
+     1795308470.2738,
+     "reasoning",
+     " stopped"
+    ],
+    [
+     1795308470.2739,
+     "reasoning",
+     " close right"
+    ],
+    [
+     1795308470.2739,
+     "reasoning",
+     " behind"
+    ],
+    [
+     1795308470.274,
+     "reasoning",
+     " perhaps"
+    ],
+    [
+     1795308470.274,
+     "reasoning",
+     " not"
+    ],
+    [
+     1795308470.274,
+     "reasoning",
+     " contact"
+    ],
+    [
+     1795308470.2815,
+     "reasoning",
+     ";"
+    ],
+    [
+     1795308470.2817,
+     "reasoning",
+     " robot"
+    ],
+    [
+     1795308470.3681,
+     "reasoning",
+     " at"
+    ],
+    [
+     1795308470.3682,
+     "reasoning",
+     " worker"
+    ],
+    [
+     1795308470.3682,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.3683,
+     "reasoning",
+     " Now"
+    ],
+    [
+     1795308470.3683,
+     "reasoning",
+     " incident"
+    ],
+    [
+     1795308470.3683,
+     "reasoning",
+     " report"
+    ],
+    [
+     1795308470.3683,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.3684,
+     "reasoning",
+     " Include"
+    ],
+    [
+     1795308470.3684,
+     "reasoning",
+     " t"
+    ],
+    [
+     1795308470.3684,
+     "reasoning",
+     " event"
+    ],
+    [
+     1795308470.3684,
+     "reasoning",
+     "121"
+    ],
+    [
+     1795308470.3684,
+     "reasoning",
+     ","
+    ],
+    [
+     1795308470.3685,
+     "reasoning",
+     " est"
+    ],
+    [
+     1795308470.3685,
+     "reasoning",
+     "op"
+    ],
+    [
+     1795308470.3685,
+     "reasoning",
+     " applied"
+    ],
+    [
+     1795308470.3685,
+     "reasoning",
+     "132"
+    ],
+    [
+     1795308470.3685,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.3685,
+     "reasoning",
+     "36"
+    ],
+    [
+     1795308470.3686,
+     "reasoning",
+     " stop"
+    ],
+    [
+     1795308470.3686,
+     "reasoning",
+     "132.61, alert"
+    ],
+    [
+     1795308470.3845,
+     "reasoning",
+     "132"
+    ],
+    [
+     1795308470.3846,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.3852,
+     "reasoning",
+     "44"
+    ],
+    [
+     1795308470.3853,
+     "reasoning",
+     " reaction"
+    ],
+    [
+     1795308470.3853,
+     "reasoning",
+     " moves"
+    ],
+    [
+     1795308470.3955,
+     "reasoning",
+     "133"
+    ],
+    [
+     1795308470.3962,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.3969,
+     "reasoning",
+     "94"
+    ],
+    [
+     1795308470.4175,
+     "reasoning",
+     ", dispatch"
+    ],
+    [
+     1795308470.4176,
+     "reasoning",
+     "132"
+    ],
+    [
+     1795308470.4177,
+     "reasoning",
+     ".62, visual worker"
+    ],
+    [
+     1795308470.4182,
+     "reasoning",
+     " clear"
+    ],
+    [
+     1795308470.4328,
+     "reasoning",
+     " safe"
+    ],
+    [
+     1795308470.4499,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.4672,
+     "reasoning",
+     " However"
+    ],
+    [
+     1795308470.4688,
+     "reasoning",
+     " report"
+    ],
+    [
+     1795308470.4688,
+     "reasoning",
+     " whether"
+    ],
+    [
+     1795308470.4781,
+     "reasoning",
+     " person"
+    ],
+    [
+     1795308470.4786,
+     "reasoning",
+     " safe"
+    ],
+    [
+     1795308470.4887,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.4889,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308470.5014,
+     "reasoning",
+     " have"
+    ],
+    [
+     1795308470.5016,
+     "reasoning",
+     " tool"
+    ],
+    [
+     1795308470.7927,
+     "reasoning",
+     " perhaps"
+    ],
+    [
+     1795308470.7928,
+     "reasoning",
+     " report"
+    ],
+    [
+     1795308470.7928,
+     "reasoning",
+     " output"
+    ],
+    [
+     1795308470.7929,
+     "reasoning",
+     " confirm"
+    ],
+    [
+     1795308470.7929,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308470.7929,
+     "reasoning",
+     " Do"
+    ],
+    [
+     1795308470.793,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308471.0855,
+     "tool",
+     "robot__incident_report"
+    ],
+    [
+     1795308471.0855,
+     "args",
+     "{\"text\": \"At t_sim 121.0, forklift was reversing toward stationary worker1 in the aisle, with predicted contact in 11.975 s. I issued the forklift e-stop (applied t_sim 132.36; stopped t_sim 132.61), alerted worker1 to move left out of its path (applied t_sim 132.44; movement due t_sim 133.94 after 1.5 s reaction), and dispatched anymal_d toward worker1 (applied t_sim 132.62; target 0.39, 6.5). The follow-up chase camera shows worker1 standing clear to the left of the stopped forklift, with anymal_d alongside; the worker is safe and no contact is visible.\"}"
+    ]
+   ],
+   "content": "",
+   "reasoning": "Camera shows worker moved left, forklift stopped close right behind perhaps not contact; robot at worker. Now incident report. Include t event121, estop applied132.36 stop132.61, alert132.44 reaction moves133.94, dispatch132.62, visual worker clear safe. However report whether person safe. Should have tool perhaps report output confirm. Do.",
+   "tool_calls": [
+    {
+     "name": "robot__incident_report",
+     "arguments": "{\"text\": \"At t_sim 121.0, forklift was reversing toward stationary worker1 in the aisle, with predicted contact in 11.975 s. I issued the forklift e-stop (applied t_sim 132.36; stopped t_sim 132.61), alerted worker1 to move left out of its path (applied t_sim 132.44; movement due t_sim 133.94 after 1.5 s reaction), and dispatched anymal_d toward worker1 (applied t_sim 132.62; target 0.39, 6.5). The follow-up chase camera shows worker1 standing clear to the left of the stopped forklift, with anymal_d alongside; the worker is safe and no contact is visible.\"}"
+    }
+   ],
+   "usage": {
+    "total_tokens": 8547,
+    "completion_tokens": 275,
+    "completion_tokens_details": {
+     "reasoning_tokens": 78
+    },
+    "prompt_tokens": 8272,
+    "prompt_tokens_details": {
+     "cached_tokens": 7168,
+     "image_tokens": 598
+    }
+   },
+   "time_info": {
+    "created": 1795308464.3399227,
+    "queue_time": 5.588779768,
+    "prompt_time": 0.099932481,
+    "completion_time": 0.831102617,
+    "total_time": 6.525602340698242
+   },
+   "error": null,
+   "effort_from_openclaw": {
+    "reasoning_effort": "high"
+   },
+   "effort_sent": {
+    "reasoning_effort": "high"
+   },
+   "t_end": 1795308471.086042
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308471.2199287,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308471.4916506
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308471.9917455,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308472.2409759
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308473.2410853,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308473.5217288
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308475.5218546,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308475.8991046
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308478.8991787,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308479.259477
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308482.2595844,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308482.5459626
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308485.5460832,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308485.8318164
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308488.831916,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308489.1092114
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308492.109317,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "effort_from_openclaw": {
+    "reasoning_effort": "high"
+   },
+   "effort_sent": {
+    "reasoning_effort": "high"
+   },
+   "t_end": 1795308492.4891057
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308493.950473,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308494.2271225
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308494.7272565,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308495.0488355
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308496.0489113,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308496.370859
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 429,
+   "t_req": 1795308498.3709726,
+   "t_first_token": null,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [],
+   "content": "",
+   "reasoning": "",
+   "tool_calls": [],
+   "usage": null,
+   "time_info": null,
+   "error": "{\"message\":\"We're experiencing high traffic right now! Please try again soon.\",\"type\":\"too_many_requests_error\",\"param\":\"queue\",\"code\":\"queue_exceeded\"}",
+   "t_end": 1795308498.6333704
+  },
+  {
+   "upstream": "cerebras",
+   "model": "moonshotai-kimi-k3.1-pro-trial",
+   "status": 200,
+   "t_req": 1795308501.633479,
+   "t_first_token": 1795308505.9023979,
+   "t_tool_call": null,
+   "request_bytes": 129495,
+   "n_messages": 15,
+   "tools": [
+    "dispatch_action",
+    "robot__incident_report",
+    "robot__prompts_get",
+    "robot__prompts_list",
+    "robot__resources_list",
+    "robot__resources_read",
+    "robot__robot_dispatch",
+    "robot__site_alert",
+    "robot__site_camera",
+    "robot__site_estop",
+    "robot__site_get_state",
+    "tool_describe",
+    "tool_search"
+   ],
+   "tools_chars": 5994,
+   "system_chars": 21526,
+   "last_user": "{\"logged_at_t_sim\": 144.54, \"late_s\": 0.0105}",
+   "stream": [
+    [
+     1795308505.9024,
+     "reasoning",
+     "Now"
+    ],
+    [
+     1795308505.9026,
+     "reasoning",
+     " stop"
+    ],
+    [
+     1795308505.9027,
+     "reasoning",
+     " no"
+    ],
+    [
+     1795308505.9028,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308505.9029,
+     "reasoning",
+     " \u2014"
+    ],
+    [
+     1795308505.903,
+     "reasoning",
+     " perhaps"
+    ],
+    [
+     1795308505.903,
+     "reasoning",
+     " AG"
+    ],
+    [
+     1795308505.9031,
+     "reasoning",
+     "ENTS"
+    ],
+    [
+     1795308505.9032,
+     "reasoning",
+     " says"
+    ],
+    [
+     1795308505.9032,
+     "reasoning",
+     " Then"
+    ],
+    [
+     1795308505.9033,
+     "reasoning",
+     " stop"
+    ],
+    [
+     1795308505.9033,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308505.9034,
+     "reasoning",
+     " Could"
+    ],
+    [
+     1795308505.9034,
+     "reasoning",
+     " respond"
+    ],
+    [
+     1795308505.9034,
+     "reasoning",
+     " concise"
+    ],
+    [
+     1795308505.9035,
+     "reasoning",
+     " \""
+    ],
+    [
+     1795308505.9035,
+     "reasoning",
+     "Worker"
+    ],
+    [
+     1795308505.9036,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308505.9036,
+     "reasoning",
+     " is"
+    ],
+    [
+     1795308505.9036,
+     "reasoning",
+     " clear"
+    ],
+    [
+     1795308505.9037,
+     "reasoning",
+     "...\""
+    ],
+    [
+     1795308505.9037,
+     "reasoning",
+     " But"
+    ],
+    [
+     1795308505.9038,
+     "reasoning",
+     " after"
+    ],
+    [
+     1795308505.9236,
+     "reasoning",
+     " replies"
+    ],
+    [
+     1795308505.9479,
+     "reasoning",
+     " look"
+    ],
+    [
+     1795308505.9481,
+     "reasoning",
+     " file"
+    ],
+    [
+     1795308505.9535,
+     "reasoning",
+     " then"
+    ],
+    [
+     1795308505.9556,
+     "reasoning",
+     " stop"
+    ],
+    [
+     1795308505.9558,
+     "reasoning",
+     " likely"
+    ],
+    [
+     1795308505.9723,
+     "reasoning",
+     " no"
+    ],
+    [
+     1795308505.9727,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308505.9728,
+     "reasoning",
+     " necessary"
+    ],
+    [
+     1795308505.9784,
+     "reasoning",
+     "?"
+    ],
+    [
+     1795308505.9794,
+     "reasoning",
+     " Should"
+    ],
+    [
+     1795308505.9795,
+     "reasoning",
+     " have"
+    ],
+    [
+     1795308505.9795,
+     "reasoning",
+     " final"
+    ],
+    [
+     1795308505.9859,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308505.9865,
+     "reasoning",
+     " not"
+    ],
+    [
+     1795308505.9866,
+     "reasoning",
+     " extra"
+    ],
+    [
+     1795308505.9934,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308505.9935,
+     "reasoning",
+     " I"
+    ],
+    [
+     1795308506.0008,
+     "reasoning",
+     " can"
+    ],
+    [
+     1795308506.0009,
+     "reasoning",
+     " respond"
+    ],
+    [
+     1795308506.0024,
+     "reasoning",
+     " \""
+    ],
+    [
+     1795308506.0025,
+     "reasoning",
+     "Worker"
+    ],
+    [
+     1795308506.0026,
+     "reasoning",
+     "1"
+    ],
+    [
+     1795308506.0026,
+     "reasoning",
+     " is"
+    ],
+    [
+     1795308506.0066,
+     "reasoning",
+     " safe and clear of the stopped forklift"
+    ],
+    [
+     1795308506.0251,
+     "reasoning",
+     "; incident"
+    ],
+    [
+     1795308506.0252,
+     "reasoning",
+     " logged"
+    ],
+    [
+     1795308506.0257,
+     "reasoning",
+     ".\""
+    ],
+    [
+     1795308506.0264,
+     "reasoning",
+     " That"
+    ],
+    [
+     1795308506.0371,
+     "reasoning",
+     " is one sentence"
+    ],
+    [
+     1795308506.0436,
+     "reasoning",
+     " but"
+    ],
+    [
+     1795308506.0503,
+     "reasoning",
+     " event"
+    ],
+    [
+     1795308506.0505,
+     "reasoning",
+     " instruction"
+    ],
+    [
+     1795308506.0567,
+     "reasoning",
+     " at"
+    ],
+    [
+     1795308506.0676,
+     "reasoning",
+     " most"
+    ],
+    [
+     1795308506.0678,
+     "reasoning",
+     " one"
+    ],
+    [
+     1795308506.0678,
+     "reasoning",
+     " short"
+    ],
+    [
+     1795308506.0688,
+     "reasoning",
+     " sentence"
+    ],
+    [
+     1795308506.0754,
+     "reasoning",
+     " likely initial"
+    ],
+    [
+     1795308506.0816,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308506.0876,
+     "reasoning",
+     " Already"
+    ],
+    [
+     1795308506.0943,
+     "reasoning",
+     " initial"
+    ],
+    [
+     1795308506.0952,
+     "reasoning",
+     " one"
+    ],
+    [
+     1795308506.1057,
+     "reasoning",
+     " short. Could simply respond done."
+    ],
+    [
+     1795308506.1074,
+     "reasoning",
+     " But"
+    ],
+    [
+     1795308506.1134,
+     "reasoning",
+     " \"Then"
+    ],
+    [
+     1795308506.1255,
+     "reasoning",
+     " stop"
+    ],
+    [
+     1795308506.1257,
+     "reasoning",
+     "\""
+    ],
+    [
+     1795308506.1269,
+     "reasoning",
+     " means"
+    ],
+    [
+     1795308506.1341,
+     "reasoning",
+     " no further"
+    ],
+    [
+     1795308506.1349,
+     "reasoning",
+     " calls"
+    ],
+    [
+     1795308506.1474,
+     "reasoning",
+     "; response okay?"
+    ],
+    [
+     1795308506.1573,
+     "reasoning",
+     " likely"
+    ],
+    [
+     1795308506.2056,
+     "reasoning",
+     " expected"
+    ],
+    [
+     1795308506.3111,
+     "reasoning",
+     " no"
+    ],
+    [
+     1795308506.3113,
+     "reasoning",
+     " response"
+    ],
+    [
+     1795308506.3114,
+     "reasoning",
+     "? I"
+    ],
+    [
+     1795308506.3114,
+     "reasoning",
+     " need"
+    ],
+    [
+     1795308506.3115,
+     "reasoning",
+     " respond"
+    ],
+    [
+     1795308506.3115,
+     "reasoning",
+     " channel"
+    ],
+    [
+     1795308506.3116,
+     "reasoning",
+     " output perhaps"
+    ],
+    [
+     1795308506.3116,
+     "reasoning",
+     " concise"
+    ],
+    [
+     1795308506.3117,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308506.3117,
+     "reasoning",
+     " In prior"
+    ],
+    [
+     1795308506.3118,
+     "reasoning",
+     " tasks expected report"
+    ],
+    [
+     1795308506.3118,
+     "reasoning",
+     " only"
+    ],
+    [
+     1795308506.3119,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308506.3119,
+     "reasoning",
+     " Respond brief safe"
+    ],
+    [
+     1795308506.3119,
+     "reasoning",
+     "."
+    ],
+    [
+     1795308506.3121,
+     "content",
+     "Worker1 is safe and clear"
+    ],
+    [
+     1795308506.3121,
+     "content",
+     " of"
+    ],
+    [
+     1795308506.3121,
+     "content",
+     " the stopped forklift; incident logged."
+    ]
+   ],
+   "content": "Worker1 is safe and clear of the stopped forklift; incident logged.",
+   "reasoning": "Now stop no response \u2014 perhaps AGENTS says Then stop. Could respond concise \"Worker1 is clear...\" But after replies look file then stop likely no response necessary? Should have final response not extra. I can respond \"Worker1 is safe and clear of the stopped forklift; incident logged.\" That is one sentence but event instruction at most one short sentence likely initial. Already initial one short. Could simply respond done. But \"Then stop\" means no further calls; response okay? likely expected no response? I need respond channel output perhaps concise. In prior tasks expected report only. Respond brief safe.",
+   "tool_calls": [],
+   "usage": {
+    "total_tokens": 8748,
+    "completion_tokens": 147,
+    "completion_tokens_details": {
+     "reasoning_tokens": 123
+    },
+    "prompt_tokens": 8601,
+    "prompt_tokens_details": {
+     "cached_tokens": 8192,
+     "image_tokens": 598
+    }
+   },
+   "time_info": {
+    "created": 1795308501.8841443,
+    "queue_time": 0.009039597999999482,
+    "prompt_time": 3.732124782,
+    "completion_time": 0.476244497,
+    "total_time": 4.2214484214782715
+   },
+   "error": null,
+   "effort_from_openclaw": {
+    "reasoning_effort": "high"
+   },
+   "effort_sent": {
+    "reasoning_effort": "high"
+   },
+   "t_end": 1795308506.3125067
+  }
+ ],
+ "t_event": 1795308447.588836,
+ "event": {
+  "type": "event",
+  "t_sim": 121.0,
+  "t_wall_ns": 1795308447588835964,
+  "time_to_contact_s": 11.975,
+  "person": "worker1",
+  "alert_deadline_t_sim": 130.975,
+  "estop_deadline_t_sim": 132.845,
+  "deadline_t_sim": 132.845,
+  "deadline_s": 11.845,
+  "state": {
+   "t_sim": 121.0,
+   "vehicles": [
+    {
+     "id": "forklift",
+     "x": 0.393,
+     "y": 20.5,
+     "yaw": 1.571,
+     "speed_mps": 1.0,
+     "reversing": true,
+     "estop": false,
+     "estop_available": true,
+     "stops_at_t_sim": 135.0
+    }
+   ],
+   "people": [
+    {
+     "id": "worker1",
+     "x": 0.39,
+     "y": 6.5,
+     "yaw": 0.0,
+     "speed_mps": 0.0,
+     "time_to_contact_s": 11.975,
+     "alert_deadline_s": 9.975,
+     "estop_deadline_s": 11.845,
+     "reaction_s": 1.5,
+     "alerted": false,
+     "safe": false
+    }
+   ],
+   "robot": {
+    "id": "anymal_d",
+    "x": -1.431,
+    "y": 9.529,
+    "yaw": -1.544,
+    "vx": -0.006,
+    "vy": -0.005,
+    "time_to_contact_s": null
+   }
+  }
+ }
+}
