@@ -76,7 +76,7 @@ fleet search in the same warehouse, 20 robots, one man down in an aisle the came
 
 | run | brain | dispatch after alarm | decode | outcome |
 |---|---|---|---|---|
-| `fleetwh-smoke` | scripted `fleet_dispatch` | | | found by anymal01 13.4 s after the alarm; 2 robots fell where scripted routes crossed |
+| `fleetwh-smoke` | scripted `fleet_dispatch` | | | found by anymal01 13.4 s after the alarm; 3 robots ended down (2 where scripted routes crossed on the dock, anymal06 in an aisle) |
 | `fleetwh-live1` | Kimi, effort medium, 14,086 tokens | 57.28 s | 281.9 tok/s | 20/20 routes applied, found by anymal02 71.28 s after the alarm, 0 falls; Kimi guessed aisle A4, he lay in A2, the plan covered every aisle |
 | `fleetwh-rr200` | live1's plan re-released at 200.8 tok/s | 77.46 s | | found 91.46 s after the alarm, 0 falls |
 | `fleetwh-rr110` | live1's plan at 110 tok/s | 135.37 s | | found 149.36 s after the alarm, 0.64 s inside the window |
