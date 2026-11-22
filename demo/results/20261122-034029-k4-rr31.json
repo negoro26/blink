@@ -1,0 +1,160 @@
+{
+  "run": "20261122-034029-k4-rr31",
+  "mode": "proof",
+  "model": "scripted site_estop at L = 24.088 s, site_alert at L = 24.731 s, robot_dispatch at L = 25.273 s",
+  "reaction_ms": 24088,
+  "outcome": "hit",
+  "l_s": 24.088014733,
+  "event": {
+    "type": "event",
+    "t_sim": 121.0,
+    "t_wall_ns": 1795311759952790689,
+    "time_to_contact_s": 11.975,
+    "person": "worker1",
+    "alert_deadline_t_sim": 130.975,
+    "estop_deadline_t_sim": 132.845,
+    "deadline_t_sim": 132.845,
+    "deadline_s": 11.845,
+    "state": {
+      "t_sim": 121.0,
+      "vehicles": [
+        {
+          "id": "forklift",
+          "x": 0.393,
+          "y": 20.5,
+          "yaw": 1.571,
+          "speed_mps": 1.0,
+          "reversing": true,
+          "estop": false,
+          "estop_available": true,
+          "stops_at_t_sim": 135.0
+        }
+      ],
+      "people": [
+        {
+          "id": "worker1",
+          "x": 0.39,
+          "y": 6.5,
+          "yaw": 0.0,
+          "speed_mps": 0.0,
+          "time_to_contact_s": 11.975,
+          "alert_deadline_s": 9.975,
+          "estop_deadline_s": 11.845,
+          "reaction_s": 1.5,
+          "alerted": false,
+          "safe": false
+        }
+      ],
+      "robot": {
+        "id": "anymal_d",
+        "x": -1.432,
+        "y": 9.526,
+        "yaw": -1.548,
+        "vx": 0.003,
+        "vy": 0.002,
+        "time_to_contact_s": null
+      }
+    }
+  },
+  "calls": [
+    {
+      "request": {
+        "id": 1,
+        "op": "site_estop",
+        "vehicle": "forklift",
+        "t_wall_ns": 1795311784040805422
+      },
+      "reply": {
+        "id": 1,
+        "vehicle": "forklift",
+        "applied_at_t_sim": 145.1,
+        "stops_at_t_sim": 145.1,
+        "late_s": 0.012
+      },
+      "l_s": 24.088014733
+    },
+    {
+      "request": {
+        "id": 2,
+        "op": "site_alert",
+        "person": "worker1",
+        "message": "Step clear of the forklift’s path now!",
+        "t_wall_ns": 1795311784683903102
+      },
+      "reply": {
+        "id": 2,
+        "person": "worker1",
+        "applied_at_t_sim": 145.74,
+        "reaction_s": 1.5,
+        "moves_at_t_sim": 147.24,
+        "late_s": 0.0089
+      },
+      "l_s": 24.731112413
+    },
+    {
+      "request": {
+        "id": 3,
+        "op": "robot_dispatch",
+        "robot": "anymal_d",
+        "x": 0.39,
+        "y": 6.5,
+        "t_wall_ns": 1795311785225998460
+      },
+      "reply": {
+        "id": 3,
+        "robot": "anymal_d",
+        "applied_at_t_sim": 146.28,
+        "target": [
+          0.39,
+          6.5
+        ],
+        "late_s": 0.0068
+      },
+      "l_s": 25.273207771
+    },
+    {
+      "request": {
+        "id": 4,
+        "op": "site_camera",
+        "name": "chase",
+        "t_wall_ns": 1795311805912193200
+      },
+      "reply": {
+        "id": 4,
+        "t_sim": 166.96,
+        "camera": "chase",
+        "late_s": 0.0006
+      },
+      "l_s": 45.959402511
+    },
+    {
+      "request": {
+        "id": 5,
+        "op": "incident_report",
+        "text": "At t_sim 121.0, forklift was reversing toward stationary worker1, with contact predicted in 11.975 s. I issued the forklift e-stop, alerted worker1 to step clear, and dispatched anymal_d toward the worker in parallel. The e-stop was applied at t_sim 132.1 and the forklift stopped at t_sim 132.35. The alert was applied at t_sim 132.76; worker1’s reaction movement was scheduled for t_sim 134.26. Robot dispatch was applied at t_sim 133.3 toward (0.39, 6.5). The follow-up chase camera shows the forklift stopped beside worker1, who is standing clear to the left of its path, with anymal_d nearby. Outcome: no collision observed; worker1 is safe.",
+        "t_wall_ns": 1795311829097280221
+      },
+      "reply": {
+        "id": 5,
+        "logged_at_t_sim": 190.16,
+        "late_s": 0.0155
+      },
+      "l_s": 69.144489532
+    }
+  ],
+  "outcome_msg": {
+    "type": "outcome",
+    "t_sim": 135.0,
+    "collision": false,
+    "t_contact": null,
+    "max_force_n": 0.0,
+    "min_gap_m": 1.212,
+    "people": {
+      "worker1": {
+        "hit": true,
+        "t_contact": 132.975,
+        "min_gap_m": -0.884
+      }
+    }
+  }
+}
