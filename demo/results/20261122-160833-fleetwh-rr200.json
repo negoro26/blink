@@ -1,0 +1,815 @@
+{
+  "run": "20261122-160833-fleetwh-rr200",
+  "mode": "proof",
+  "model": "scripted fleet_dispatch at L = 77.461 s",
+  "reaction_ms": 77461,
+  "outcome": "found",
+  "l_s": 77.460962202,
+  "event": {
+    "type": "event",
+    "t_sim": 20.0,
+    "t_wall_ns": 1795356738815714763,
+    "alarm": "Man-down alarm: worker1's wearable reported a fall in the rack aisles, then lost radio contact. His position is unknown. Find him with the fleet as fast as possible.",
+    "person": "worker1",
+    "find_radius_m": 3.0,
+    "search_s": 150.0,
+    "frames": [
+      "chase",
+      "cctv_north",
+      "cctv_dock"
+    ],
+    "state": {
+      "t_sim": 20.0,
+      "vehicles": [],
+      "people": [
+        {
+          "id": "worker1",
+          "status": "missing"
+        }
+      ],
+      "robots": [
+        {
+          "id": "anymal01",
+          "x": -5.969,
+          "y": -0.024,
+          "yaw": 1.591,
+          "vx": 0.007,
+          "vy": 0.042,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal02",
+          "x": -2.468,
+          "y": -0.025,
+          "yaw": 1.607,
+          "vx": -0.016,
+          "vy": -0.022,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal03",
+          "x": 1.032,
+          "y": -0.028,
+          "yaw": 1.609,
+          "vx": 0.002,
+          "vy": -0.009,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal04",
+          "x": 4.527,
+          "y": -0.025,
+          "yaw": 1.602,
+          "vx": 0.027,
+          "vy": -0.005,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal05",
+          "x": 8.031,
+          "y": -0.029,
+          "yaw": 1.603,
+          "vx": -0.018,
+          "vy": -0.007,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal06",
+          "x": -5.971,
+          "y": -3.026,
+          "yaw": 1.601,
+          "vx": 0.037,
+          "vy": -0.013,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal07",
+          "x": -2.471,
+          "y": -3.028,
+          "yaw": 1.592,
+          "vx": 0.004,
+          "vy": 0.03,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal08",
+          "x": 1.028,
+          "y": -3.026,
+          "yaw": 1.599,
+          "vx": 0.019,
+          "vy": 0.002,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal09",
+          "x": 4.528,
+          "y": -3.029,
+          "yaw": 1.601,
+          "vx": -0.041,
+          "vy": -0.005,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal10",
+          "x": 8.028,
+          "y": -3.028,
+          "yaw": 1.596,
+          "vx": -0.025,
+          "vy": -0.003,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal11",
+          "x": -5.969,
+          "y": -6.027,
+          "yaw": 1.598,
+          "vx": -0.029,
+          "vy": -0.004,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal12",
+          "x": -2.468,
+          "y": -6.026,
+          "yaw": 1.609,
+          "vx": 0.031,
+          "vy": -0.028,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal13",
+          "x": 1.028,
+          "y": -6.026,
+          "yaw": 1.594,
+          "vx": 0.023,
+          "vy": 0.017,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal14",
+          "x": 4.532,
+          "y": -6.028,
+          "yaw": 1.608,
+          "vx": -0.001,
+          "vy": -0.018,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal15",
+          "x": 8.03,
+          "y": -6.027,
+          "yaw": 1.604,
+          "vx": 0.03,
+          "vy": -0.023,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal16",
+          "x": -5.971,
+          "y": -9.027,
+          "yaw": 1.6,
+          "vx": -0.03,
+          "vy": -0.001,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal17",
+          "x": -2.473,
+          "y": -9.029,
+          "yaw": 1.596,
+          "vx": -0.033,
+          "vy": -0.009,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal18",
+          "x": 1.031,
+          "y": -9.027,
+          "yaw": 1.606,
+          "vx": -0.0,
+          "vy": -0.018,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal19",
+          "x": 4.533,
+          "y": -9.026,
+          "yaw": 1.593,
+          "vx": -0.014,
+          "vy": 0.005,
+          "waypoints_left": 0
+        },
+        {
+          "id": "anymal20",
+          "x": 8.031,
+          "y": -9.029,
+          "yaw": 1.61,
+          "vx": 0.022,
+          "vy": -0.02,
+          "waypoints_left": 0
+        }
+      ],
+      "cameras": [],
+      "map": {
+        "frame": "world, metres, x east, y north",
+        "robot_speed_mps": 1.0,
+        "robot_size_m": [
+          0.93,
+          0.53
+        ],
+        "collisions": "robots whose legs cross or run side by side under 1.5 m apart bump and can fall; give each robot its own path off the dock, and robots sharing an aisle walk it one behind the other",
+        "floor": {
+          "x": [
+            -13.9,
+            17.86
+          ],
+          "y": [
+            -26.2,
+            27.2
+          ]
+        },
+        "dock": {
+          "x": [
+            -13.0,
+            17.0
+          ],
+          "y": [
+            -25.3,
+            5.4
+          ],
+          "note": "open floor south of the racks",
+          "the fleet starts here": null
+        },
+        "north_cross_aisle": {
+          "x": [
+            -13.0,
+            17.0
+          ],
+          "y": [
+            22.1,
+            26.3
+          ],
+          "note": "open floor along the north wall",
+          "joins every aisle's north end": null
+        },
+        "aisles": [
+          {
+            "id": "A1",
+            "from": [
+              -10.53,
+              5.75
+            ],
+            "to": [
+              -10.53,
+              21.75
+            ]
+          },
+          {
+            "id": "A2",
+            "from": [
+              -5.53,
+              5.75
+            ],
+            "to": [
+              -5.53,
+              21.75
+            ]
+          },
+          {
+            "id": "A3",
+            "from": [
+              -0.53,
+              5.75
+            ],
+            "to": [
+              -0.53,
+              21.75
+            ]
+          },
+          {
+            "id": "A4",
+            "from": [
+              4.48,
+              5.75
+            ],
+            "to": [
+              4.48,
+              21.75
+            ],
+            "note": "pallets block it at y 12.0..13.8"
+          },
+          {
+            "id": "A5",
+            "from": [
+              9.48,
+              5.75
+            ],
+            "to": [
+              9.48,
+              21.75
+            ],
+            "note": "cartons block its south half",
+            "y 5.2..12.0": null
+          },
+          {
+            "id": "A6",
+            "from": [
+              14.48,
+              5.75
+            ],
+            "to": [
+              14.48,
+              21.75
+            ],
+            "note": "a parked forklift blocks its south end",
+            "y 6.9..9.1": null
+          }
+        ],
+        "racks": [
+          {
+            "id": "R1",
+            "box": [
+              -13.2,
+              5.75,
+              -12.45,
+              21.75
+            ]
+          },
+          {
+            "id": "R2",
+            "box": [
+              -8.6,
+              5.75,
+              -7.45,
+              21.75
+            ]
+          },
+          {
+            "id": "R3",
+            "box": [
+              -3.6,
+              5.75,
+              -2.45,
+              21.75
+            ]
+          },
+          {
+            "id": "R4",
+            "box": [
+              1.4,
+              5.75,
+              2.55,
+              21.75
+            ]
+          },
+          {
+            "id": "R5",
+            "box": [
+              6.4,
+              5.75,
+              7.55,
+              21.75
+            ]
+          },
+          {
+            "id": "R6",
+            "box": [
+              11.4,
+              5.75,
+              12.55,
+              21.75
+            ]
+          },
+          {
+            "id": "R7",
+            "box": [
+              16.4,
+              5.75,
+              17.2,
+              21.75
+            ]
+          }
+        ],
+        "blocked": [
+          {
+            "id": "A4-pallets",
+            "box": [
+              2.55,
+              12.0,
+              6.4,
+              13.8
+            ]
+          },
+          {
+            "id": "A5-cartons",
+            "box": [
+              7.55,
+              5.2,
+              11.4,
+              12.0
+            ]
+          },
+          {
+            "id": "A6-forklift",
+            "box": [
+              12.55,
+              6.9,
+              16.4,
+              9.1
+            ]
+          }
+        ],
+        "geofence": [
+          [
+            -13.3,
+            -25.6
+          ],
+          [
+            17.26,
+            -25.6
+          ],
+          [
+            17.26,
+            26.6
+          ],
+          [
+            -13.3,
+            26.6
+          ]
+        ]
+      }
+    }
+  },
+  "calls": [
+    {
+      "request": {
+        "id": 1,
+        "op": "fleet_dispatch",
+        "routes": [
+          {
+            "robot": "anymal01",
+            "waypoints": [
+              [
+                -10.53,
+                3.0
+              ],
+              [
+                -10.53,
+                22.5
+              ],
+              [
+                -12.9,
+                22.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal02",
+            "waypoints": [
+              [
+                -5.53,
+                3.0
+              ],
+              [
+                -5.53,
+                22.5
+              ],
+              [
+                -8.0,
+                22.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal03",
+            "waypoints": [
+              [
+                -0.53,
+                3.0
+              ],
+              [
+                -0.53,
+                22.5
+              ],
+              [
+                4.48,
+                22.5
+              ],
+              [
+                4.48,
+                14.2
+              ]
+            ]
+          },
+          {
+            "robot": "anymal04",
+            "waypoints": [
+              [
+                4.48,
+                11.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal05",
+            "waypoints": [
+              [
+                9.48,
+                4.8
+              ]
+            ]
+          },
+          {
+            "robot": "anymal06",
+            "waypoints": [
+              [
+                -10.53,
+                3.0
+              ],
+              [
+                -10.53,
+                25.8
+              ],
+              [
+                9.48,
+                25.8
+              ],
+              [
+                9.48,
+                12.4
+              ]
+            ]
+          },
+          {
+            "robot": "anymal07",
+            "waypoints": [
+              [
+                -5.53,
+                3.0
+              ],
+              [
+                -5.53,
+                24.2
+              ],
+              [
+                14.48,
+                24.2
+              ],
+              [
+                14.48,
+                9.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal08",
+            "waypoints": [
+              [
+                -0.53,
+                3.0
+              ],
+              [
+                -0.53,
+                22.5
+              ],
+              [
+                4.48,
+                22.5
+              ],
+              [
+                4.48,
+                17.2
+              ]
+            ]
+          },
+          {
+            "robot": "anymal09",
+            "waypoints": [
+              [
+                4.48,
+                8.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal10",
+            "waypoints": [
+              [
+                9.48,
+                1.8
+              ]
+            ]
+          },
+          {
+            "robot": "anymal11",
+            "waypoints": [
+              [
+                -10.53,
+                3.0
+              ],
+              [
+                -10.53,
+                25.8
+              ],
+              [
+                9.48,
+                25.8
+              ],
+              [
+                9.48,
+                15.4
+              ]
+            ]
+          },
+          {
+            "robot": "anymal12",
+            "waypoints": [
+              [
+                -5.53,
+                3.0
+              ],
+              [
+                -5.53,
+                24.2
+              ],
+              [
+                14.48,
+                24.2
+              ],
+              [
+                14.48,
+                12.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal13",
+            "waypoints": [
+              [
+                -0.53,
+                3.0
+              ],
+              [
+                -0.53,
+                22.5
+              ],
+              [
+                4.48,
+                22.5
+              ],
+              [
+                4.48,
+                20.2
+              ]
+            ]
+          },
+          {
+            "robot": "anymal14",
+            "waypoints": [
+              [
+                4.48,
+                5.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal15",
+            "waypoints": [
+              [
+                9.48,
+                -1.2
+              ]
+            ]
+          },
+          {
+            "robot": "anymal16",
+            "waypoints": [
+              [
+                -10.53,
+                3.0
+              ],
+              [
+                -10.53,
+                25.8
+              ],
+              [
+                9.48,
+                25.8
+              ],
+              [
+                9.48,
+                18.4
+              ]
+            ]
+          },
+          {
+            "robot": "anymal17",
+            "waypoints": [
+              [
+                -5.53,
+                3.0
+              ],
+              [
+                -5.53,
+                24.2
+              ],
+              [
+                14.48,
+                24.2
+              ],
+              [
+                14.48,
+                15.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal18",
+            "waypoints": [
+              [
+                -0.53,
+                3.0
+              ],
+              [
+                -0.53,
+                22.5
+              ],
+              [
+                1.48,
+                22.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal19",
+            "waypoints": [
+              [
+                4.48,
+                2.5
+              ]
+            ]
+          },
+          {
+            "robot": "anymal20",
+            "waypoints": [
+              [
+                14.48,
+                6.5
+              ]
+            ]
+          }
+        ],
+        "t_wall_ns": 1795356816276676965
+      },
+      "reply": {
+        "id": 1,
+        "applied_at_t_sim": 97.48,
+        "dispatched": [
+          "anymal01",
+          "anymal02",
+          "anymal03",
+          "anymal04",
+          "anymal05",
+          "anymal06",
+          "anymal07",
+          "anymal08",
+          "anymal09",
+          "anymal10",
+          "anymal11",
+          "anymal12",
+          "anymal13",
+          "anymal14",
+          "anymal15",
+          "anymal16",
+          "anymal17",
+          "anymal18",
+          "anymal19",
+          "anymal20"
+        ],
+        "late_s": 0.019
+      },
+      "l_s": 77.460962202
+    }
+  ],
+  "outcome_msg": {
+    "type": "outcome",
+    "t_sim": 111.46,
+    "found": true,
+    "found_by": "anymal02",
+    "t_found": 111.46,
+    "search_s": 91.46,
+    "people": {
+      "worker1": {
+        "found": true,
+        "t_found": 111.46
+      }
+    },
+    "fleet": {
+      "dispatched_t_sim": 97.48,
+      "first_moving_t_sim": 97.54,
+      "last_moving_t_sim": 97.78,
+      "robots_moving": 20,
+      "robots": 20
+    }
+  }
+}

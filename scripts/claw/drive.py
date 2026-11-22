@@ -611,7 +611,7 @@ def main():
             flush=True,
         )
     if args.mode == "live":
-        _, outcome = relay.wait(900.0, type="outcome")
+        _, outcome = relay.wait(2400.0, type="outcome")  # a 150 s search with 20 robots walking at 0.08x real time
     time.sleep(0.5)
     tools = remote_lines(log_path, start_ns)
     for turn, event, t_recv in turns:

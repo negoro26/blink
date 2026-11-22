@@ -56,7 +56,7 @@ Client to sim (requests, each with `id`, `op`, `t_wall_ns`) and replies (each wi
   or alert); null: none predicted, or that action can no longer save the person, or it has been used. In a search
   `vehicles` is empty, a robot has no `time_to_contact_s`, and a person is `{"id","status":"missing"}` until found,
   then `{"id","status":"found","x","y","found_by","found_t_sim"}`. `map` is the scenario's site map as written
-  (lanes, panel blocks, `geofence` polygon, robot speed), absent when the scenario has none.
+  (lanes or aisles, panel blocks or racks, `geofence` polygon, robot speed), absent when the scenario has none.
 - `site_camera`, `name`: one of the state's `cameras`: `chase` (a fixed CCTV view), the scenario's other fixed site
   cameras, and each robot's own camera (`front` for a single robot, else the robot's id) -> `{"t_sim","camera","jpeg_b64"}`,
   640x360 JPEG, rendered at that step on request (no periodic rendering).
@@ -70,7 +70,8 @@ Client to sim (requests, each with `id`, `op`, `t_wall_ns`) and replies (each wi
 - `fleet_dispatch`, `routes`: `[{"robot", "waypoints": [[x, y], ...]}]` -> `{"applied_at_t_sim","dispatched":[ids],"errors":{id: text}}`:
   every route applied at the same step; each robot's follower walks its waypoints in order, then it holds. Every route
   is checked before any applies: one with an unknown or missing robot, missing or no waypoints, a waypoint that is
-  not an `[x, y]` pair or a waypoint outside the map's `geofence` is refused (in `errors` under its robot id, or
+  not an `[x, y]` pair, a waypoint outside the map's `geofence`, or a straight leg (from the robot's position through
+  its waypoints) within 0.3 m of a scenario `obstacles` box is refused (in `errors` under its robot id, or
   `routes[i]` without one; absent when none); the others still apply.
 - `incident_report`, `text` -> `{"logged_at_t_sim"}`: a `{"type":"incident_report","t_sim","text"}` line in the
   sim's log. Nothing leaves the sim.

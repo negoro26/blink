@@ -1,0 +1,135 @@
+# Blink's fleet scene in warehouse1 (NVIDIA's Simple_Warehouse, public, CC-BY-4.0) for 20 ANYmal-D under
+# run_legged (`--world src/the sim/assets/data/worlds/warehouse1 --scenario
+# demo/scenario_fleet_warehouse.yaml`): a picker is down somewhere in the rack aisles and his wearable has lost radio
+# contact. The site supervisor (OpenClaw + Kimi, robot_mcp) gets the man-down alarm with the site map, the fleet's state
+# and three camera frames, and plans a route for every robot in one fleet_dispatch. The sim judges the find: he is
+# found at the first policy step at which a robot's base stands within find_radius_m of him (the sim's blink module.Search).
+#
+# Frame: warehouse1's world frame, as in scenario_warehouse.yaml (origin at the hall's (-12.4, 3.0), x east, y north,
+# metres). Measured from warehouse1.mesh.npz: the hall's floor is x -13.9..17.86, y -26.2..27.2; seven rack rows run
+# north-south from y 5.75 to 21.75, 1.15 m deep at a 5 m pitch (R1 and R7 against the walls), so the six aisles
+# between them (A1 west to A6 east) are 3.85 m wide; the floor south of the racks is open (the dock), and a 5.4 m
+# cross aisle runs along the north wall. Three aisles hold props of the scene that the scene does not collide:
+# spilled cartons fill A5's south half, a parked forklift A6's south end, pallets cross A4 at y 12..13.8. The racks and
+# those props are box colliders here (`obstacles`) and the map's `racks`/`blocked`: fleet_dispatch refuses a route
+# whose straight legs, from the robot's position on, come within 0.3 m of one. The geofence is the floor shrunk 0.6 m.
+#
+# The fleet docks on the open floor south of the racks, five columns 3.5 m apart and four rows 3 m apart, facing
+# north up the aisles. worker1 lies on the floor of aisle A2, 9 m in from its south end, his head up the aisle: the
+# north CCTV sees him past rack R3's north end (head and chest; R3 hides his legs), the mast camera over the dock
+# and the dock CCTV look into A2 from the south at 15 to 40 m.
+
+fleet:
+  - {id: anymal01, start: [-6.0, 0.0, 1.5708]}
+  - {id: anymal02, start: [-2.5, 0.0, 1.5708]}
+  - {id: anymal03, start: [1.0, 0.0, 1.5708]}
+  - {id: anymal04, start: [4.5, 0.0, 1.5708]}
+  - {id: anymal05, start: [8.0, 0.0, 1.5708]}
+  - {id: anymal06, start: [-6.0, -3.0, 1.5708]}
+  - {id: anymal07, start: [-2.5, -3.0, 1.5708]}
+  - {id: anymal08, start: [1.0, -3.0, 1.5708]}
+  - {id: anymal09, start: [4.5, -3.0, 1.5708]}
+  - {id: anymal10, start: [8.0, -3.0, 1.5708]}
+  - {id: anymal11, start: [-6.0, -6.0, 1.5708]}
+  - {id: anymal12, start: [-2.5, -6.0, 1.5708]}
+  - {id: anymal13, start: [1.0, -6.0, 1.5708]}
+  - {id: anymal14, start: [4.5, -6.0, 1.5708]}
+  - {id: anymal15, start: [8.0, -6.0, 1.5708]}
+  - {id: anymal16, start: [-6.0, -9.0, 1.5708]}
+  - {id: anymal17, start: [-2.5, -9.0, 1.5708]}
+  - {id: anymal18, start: [1.0, -9.0, 1.5708]}
+  - {id: anymal19, start: [4.5, -9.0, 1.5708]}
+  - {id: anymal20, start: [8.0, -9.0, 1.5708]}
+
+people:
+  - id: worker1
+    start: [-5.9, 15.0, 1.75]  # lying in aisle A2, his feet 9.25 m in from its south end, head up the aisle
+    down: true
+    radius_m: 0.28
+    usd: worker.usda  # demo/build_worker.py under $CLAW_ASSETS: seen by the cameras, never contact
+    lie: worker_lying.npz  # feat/worker-walk's lying pose (on his side, knees and arms bent): replay only
+    sha256:
+      worker.usda: 8bae9394458820186cd6f88a51e3a635dbb35efbfa3c4a47334b1a7773f3b661
+      worker_posed.usda: b1fdbb0a40a425633ca71cfc86c9f5fc32cddccc86491de799b58f180f3a001e
+      worker_lying.npz: 72abedd5c4c9a852ad63ee5b3c8a704e009024e8da5130ce23d9043502afbee8
+
+search:
+  person: worker1
+  t_alarm: 20.0       # sim s: after the brain's warm-up turn
+  find_radius_m: 3.0  # a robot's base this close to him: he is in its front camera's view
+  search_s: 150.0     # the outcome comes at the find, or this long after the alarm
+  frames: [chase, cctv_north, cctv_dock]  # the cameras whose frames go with the alarm
+  alarm: >-
+    Man-down alarm: worker1's wearable reported a fall in the rack aisles, then lost radio contact. His position is
+    unknown. Find him with the fleet as fast as possible.
+
+map:
+  frame: world, metres, x east, y north
+  robot_speed_mps: 1.0  # each robot's walking speed on a route (the follower's)
+  robot_size_m: [0.93, 0.53]  # ANYmal-D, length x width
+  collisions: robots whose legs cross or run side by side under 1.5 m apart bump and can fall; give each robot its own path off the dock, and robots sharing an aisle walk it one behind the other
+  floor: {x: [-13.9, 17.86], y: [-26.2, 27.2]}
+  dock: {x: [-13.0, 17.0], y: [-25.3, 5.4], note: open floor south of the racks, the fleet starts here}
+  north_cross_aisle: {x: [-13.0, 17.0], y: [22.1, 26.3], note: open floor along the north wall, joins every aisle's north end}
+  aisles:  # centre lines from the south end to the north end, 3.85 m wide between two rack rows
+    - {id: A1, from: [-10.53, 5.75], to: [-10.53, 21.75]}
+    - {id: A2, from: [-5.53, 5.75], to: [-5.53, 21.75]}
+    - {id: A3, from: [-0.53, 5.75], to: [-0.53, 21.75]}
+    - {id: A4, from: [4.48, 5.75], to: [4.48, 21.75], note: pallets block it at y 12.0..13.8}
+    - {id: A5, from: [9.48, 5.75], to: [9.48, 21.75], note: cartons block its south half, y 5.2..12.0}
+    - {id: A6, from: [14.48, 5.75], to: [14.48, 21.75], note: a parked forklift blocks its south end, y 6.9..9.1}
+  racks:  # solid shelving 4 to 6 m tall, [x0, y0, x1, y1] (R1 and R7 run on to the walls): no leg through or within 0.3 m
+    - {id: R1, box: [-13.2, 5.75, -12.45, 21.75]}
+    - {id: R2, box: [-8.6, 5.75, -7.45, 21.75]}
+    - {id: R3, box: [-3.6, 5.75, -2.45, 21.75]}
+    - {id: R4, box: [1.4, 5.75, 2.55, 21.75]}
+    - {id: R5, box: [6.4, 5.75, 7.55, 21.75]}
+    - {id: R6, box: [11.4, 5.75, 12.55, 21.75]}
+    - {id: R7, box: [16.4, 5.75, 17.2, 21.75]}
+  blocked:  # [x0, y0, x1, y1]
+    - {id: A4-pallets, box: [2.55, 12.0, 6.4, 13.8]}
+    - {id: A5-cartons, box: [7.55, 5.2, 11.4, 12.0]}
+    - {id: A6-forklift, box: [12.55, 6.9, 16.4, 9.1]}
+  geofence: [[-13.3, -25.6], [17.26, -25.6], [17.26, 26.6], [-13.3, 26.6]]
+
+obstacles:  # the map's racks and blocked areas as contact (the scene USD is not contact)
+  - {name: R1, box: [-13.6, 5.75, -12.45, 21.75, 2.5]}
+  - {name: R2, box: [-8.6, 5.75, -7.45, 21.75, 2.5]}
+  - {name: R3, box: [-3.6, 5.75, -2.45, 21.75, 2.5]}
+  - {name: R4, box: [1.4, 5.75, 2.55, 21.75, 2.5]}
+  - {name: R5, box: [6.4, 5.75, 7.55, 21.75, 2.5]}
+  - {name: R6, box: [11.4, 5.75, 12.55, 21.75, 2.5]}
+  - {name: R7, box: [16.4, 5.75, 17.55, 21.75, 2.5]}
+  - {name: A4-pallets, box: [2.55, 12.0, 6.4, 13.8, 1.5]}
+  - {name: A5-cartons, box: [7.55, 5.2, 11.4, 12.0, 1.8]}
+  - {name: A6-forklift, box: [12.55, 6.9, 16.4, 9.1, 1.8]}
+
+front_camera:  # every robot's own camera, smaller than the mount's 1280 x 720: 20 of them render in one call
+  width: 640
+  height: 360
+
+chase:  # the site's mast camera over the dock, looking north up the aisles
+  eye: [2.0, -16.0, 9.0]
+  target: [1.0, 10.0, 0.0]
+  hfov_deg: 80.0
+  width: 1920
+  height: 1080
+
+site_cameras:
+  cctv_north:  # north wall above aisle A3's head, looking south-west past R3's north end into A2
+    eye: [-1.5, 27.0, 6.0]
+    target: [-6.5, 14.0, 0.0]
+    hfov_deg: 75.0
+    width: 1280
+    height: 720
+  cctv_dock:  # south-west corner, looking north-east over the dock to the aisle mouths
+    eye: [-13.0, -25.5, 5.0]
+    target: [3.0, 3.0, 0.5]
+    hfov_deg: 90.0
+    width: 1280
+    height: 720
+
+odom_hz: 20.0
+
+record:
+  fps: 30

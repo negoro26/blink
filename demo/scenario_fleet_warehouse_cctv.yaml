@@ -1,0 +1,16 @@
+# scenario_fleet_warehouse.yaml seen through its north CCTV for the film's replay pass only
+# (`scripts/blink/replay.sh <run> --name cctv --scenario demo/scenario_fleet_warehouse_cctv.yaml`): the camera whose
+# alarm frame shows worker1's head and chest past rack R3's north end, rendered textured at the frame's own lens.
+# A replay simulates nothing.
+
+include: scenario_fleet_warehouse.yaml
+
+chase:
+  eye: [-1.5, 27.0, 6.0]
+  target: [-6.5, 14.0, 0.0]
+  hfov_deg: 75.0
+  width: 1920
+  height: 1080
+
+record:
+  fps: 30
