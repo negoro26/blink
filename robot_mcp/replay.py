@@ -6,7 +6,7 @@ EVENT.json is a sim's `event` message (a live run's blink_log.jsonl broadcast li
 reply at the event. A client's `{"op": "fire"}` sends that event again to every client, stamped with t_wall_ns now and
 the recorded t_sim, and restarts the time mapping. Then, as the sim would at each request's mapped time t_target:
 site_get_state answers the recorded state with t_sim = t_target and every time_to_contact_s counted down (nothing
-moves: no action changes it); site_estop, site_alert and robot_dispatch answer applied_at_t_sim = t_target;
+moves: no action changes it); site_estop, site_alert, robot_dispatch and fleet_dispatch answer applied_at_t_sim = t_target;
 incident_report answers logged_at_t_sim; site_camera answers <name>.jpg beside EVENT.json, if any. Every message in
 and out is a line of ./blink_log.jsonl.
 """
@@ -65,7 +65,7 @@ class Replay:
         if op == "site_get_state":
             state = copy.deepcopy(ev["state"])
             state["t_sim"] = now
-            for who in [*state["people"], state["robot"]]:
+            for who in [*state["people"], *state["robots"]]:
                 if who.get("time_to_contact_s") is not None:
                     who["time_to_contact_s"] = round(max(0.0, who["time_to_contact_s"] - (t - ev["t_sim"])), 3)
             return {**state, "late_s": 0.0}
@@ -75,6 +75,9 @@ class Replay:
             return {"person": req.get("person"), "applied_at_t_sim": now, "late_s": 0.0}
         if op == "robot_dispatch":
             return {"robot": req.get("robot"), "applied_at_t_sim": now, "late_s": 0.0}
+        if op == "fleet_dispatch":
+            robots = sorted(r.get("robot") for r in req.get("routes", ()))
+            return {"applied_at_t_sim": now, "dispatched": robots, "late_s": 0.0}
         if op == "incident_report":
             return {"logged_at_t_sim": now, "late_s": 0.0}
         if op == "site_camera":

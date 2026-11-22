@@ -76,7 +76,7 @@ class Sim:
             self.sock.sendall((json.dumps(req) + "\n").encode())
         return rid, req
 
-    def wait(self, rid, timeout=120.0):
+    def wait(self, rid, timeout=900.0):
         """The reply to request rid."""
         with self.got:
             if not self.got.wait_for(lambda: self.waiting[rid] is not None or self.closed, timeout):
