@@ -322,7 +322,7 @@ def ask(brain, prompt, session=None, jpegs=()):
     """One agent turn over the gateway's chat completions endpoint, streamed: in OpenClaw session `session` (the
     endpoint's `user`; None: a fresh session), with the base64 JPEGs attached."""
     up = urlsplit(GATEWAY)
-    conn = http.client.HTTPConnection(up.netloc, timeout=600)
+    conn = http.client.HTTPConnection(up.netloc, timeout=3600)
     content = prompt
     if jpegs:
         images = [{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{j}"}} for j in jpegs]
