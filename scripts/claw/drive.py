@@ -22,7 +22,7 @@ session its warm-up turn opened (OpenClaw starts the MCP server once per session
 one prompt (EVENT_PROMPT) with EVENT_CAMERA's frame, asked for on the relay as the event arrives, attached as an
 image: the agent sees the site in the same model call that acts. Before the first event, one warm-up turn (WARMUP,
 one model call) starts the MCP server and fills the provider's prompt cache, as a robot's brain is up before its
-hazard.
+hazard, and one EVENT_CAMERA frame is rendered (a session's first render is the slow one).
 
 The MCP server's log (robot_mcp/server.py, gpu-host's clock) gives each tool call's request t_wall_ns and the sim's
 reply (applied_at_t_sim, late_s); L is the first action's (ACTIONS) request t_wall_ns minus the event's, both read on
@@ -564,6 +564,11 @@ def main():
         openclaw_target(*target)
         relay = Relay(target)
         log_path = f"~/sim-runs/{args.session}/mcp.jsonl"
+    # A session renders its first camera frame slowly (3.8 s in 20261122-022603-sl2-mcptest, later ones 0.05 to 0.8 s;
+    # 3.0 s of L in 20261122-024438-site-live-k3): render one before the event.
+    t_cam = now()
+    _, cam = relay.wait(60.0, id=relay.send({"op": "site_camera", "name": EVENT_CAMERA}))
+    print(f"camera warm-up: {now() - t_cam:.2f} s, error {(cam or {}).get('error')}", flush=True)
     # live: the warm-up and the event share one OpenClaw session, so the event turn finds the MCP server up (OpenClaw
     # starts one per session); gate: every turn in a fresh session, so no event sees an earlier one.
     session = (args.run or args.session) if args.mode == "live" else None
