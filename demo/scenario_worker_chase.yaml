@@ -1,0 +1,13 @@
+# scenario_worker.yaml with its chase camera riding on the forklift, for the film's replay pass only
+# (`scripts/blink/replay.sh <run> --scenario demo/scenario_worker_chase.yaml`): above and beyond the fork tips,
+# looking over the mast down the aisle the forklift reverses into, so the worker grows in frame as it closes on him.
+# The schedule, people and verdict are scenario_worker.yaml's; a replay simulates nothing.
+
+include: scenario_worker.yaml
+
+chase:
+  eye: [-0.2, 24.5, 3.4]     # the first frame's pose, before the replay moves it
+  target: [0.39, 12.0, 0.9]
+  follow:                    # in the forklift's frame: x along its forks (north at the start), y to their left
+    eye: [3.5, 0.6, 3.4]
+    target: [-9.0, 0.0, 0.9]
