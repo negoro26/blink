@@ -35,7 +35,7 @@ case "${1:-}" in
         cp "$REPO/robot_mcp/openclaw/AGENTS.md" "$WORKSPACE/AGENTS.md"
         mkdir -p "$HOME/.openclaw/agents/blink/agent"
         echo '{"retry": {"provider": {"maxRetries": 8, "maxRetryDelayMs": 3000}}}' > "$HOME/.openclaw/agents/blink/agent/settings.json"
-        kimi='{"id": "moonshotai-kimi-k3.1-pro-trial", "name": "Kimi K3.1 Pro (Cerebras)", "input": ["text", "image"], "reasoning": true, "contextWindow": 131072, "maxTokens": 8192}'
+        kimi='{"id": "moonshotai-kimi-k3.1-pro-trial", "name": "Kimi K3.1 Pro (Cerebras)", "input": ["text", "image"], "reasoning": true, "contextWindow": 131072, "maxTokens": 32768}'
         qwen='{"id": "qwen-3.8-27b", "name": "Qwen 3.8 27B (Cerebras)", "input": ["text", "image"], "reasoning": true, "contextWindow": 65536, "maxTokens": 8192}'
         vllm='{"id": "qwen-27b", "name": "Qwen3.8-27B fine-tune (vLLM, GPU)", "input": ["text", "image"], "reasoning": true, "contextWindow": 65536, "maxTokens": 8192,
             "compat": {"thinkingFormat": "qwen-chat-template"}}'
