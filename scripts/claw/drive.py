@@ -610,7 +610,7 @@ def main():
             flush=True,
         )
     if args.mode == "live":
-        _, outcome = relay.wait(300.0, type="outcome")
+        _, outcome = relay.wait(900.0, type="outcome")
     time.sleep(0.5)
     tools = remote_lines(log_path, start_ns)
     for turn, event, t_recv in turns:

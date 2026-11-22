@@ -48,7 +48,7 @@ case "${1:-}" in
   "tools": {"toolSearch": {"mode": "tools", "exclude": [{"source": "mcp", "name": "robot__*"}]}},
   "mcp": {"servers": {
     "go2": null,
-    "robot": {"command": "$REPO/scripts/claw/box_cmd.sh", "args": [], "connectionTimeoutMs": 60000, "requestTimeoutMs": 120000}
+    "robot": {"command": "$REPO/scripts/claw/box_cmd.sh", "args": [], "connectionTimeoutMs": 60000, "requestTimeoutMs": 900000}
   }},
   "models": {"providers": {
     "go2cerebras": null,
