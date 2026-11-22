@@ -19,8 +19,8 @@ The sim side is one protocol connection (robot_mcp.sim relay through scripts/cla
 outcome arrive on it. `gate` runs robot_mcp.replay on gpu-host with --event (a recorded sim event) and fires it
 --repeat times, each into a fresh OpenClaw session; `live` waits for a live session's own event and hands it to the
 session its warm-up turn opened (OpenClaw starts the MCP server once per session). Each event goes to the agent as
-one prompt (EVENT_PROMPT) with EVENT_CAMERA's frame, asked for on the relay as the event arrives, attached as an
-image: the agent sees the site in the same model call that acts. Before the first event, one warm-up turn (WARMUP,
+one prompt (EVENT_PROMPT) with the frames of the cameras the event names (`frames`, else EVENT_CAMERA), asked for on
+the relay as the event arrives, attached as images: the agent sees the site in the same model call that acts. Before the first event, one warm-up turn (WARMUP,
 one model call) starts the MCP server and fills the provider's prompt cache, as a robot's brain is up before its
 hazard, and one EVENT_CAMERA frame is rendered (a session's first render is the slow one).
 
@@ -30,7 +30,7 @@ gpu-host's clock. Tap times are this laptop's, shifted onto gpu-host's by an off
 (min-RTT sample).
 
 Writes demo/results/<run>.json: compose_split.sh's keys (run, model, reaction_ms, tokens_per_s, outcome), the event,
-the outcome, every tool call, every model call with its token stream, the event frame (kept byte for byte as
+the outcome, every tool call, every model call with its token stream, the event frames (each kept byte for byte as
 camera/<event t_wall_ns>-<camera>-event.jpg beside the MCP log) and the agent's final text. A refused model call stays
 in the list with its status and error; an episode's retry_s sums the time from each refused request before the deciding
 call to the next request, so L splits into retries, queue and decode (refusals after the decision are counted, not timed).
@@ -72,11 +72,12 @@ BRAINS = {
     "qwen": {"provider": "blinkcerebras", "model": "qwen-3.8-27b", "label": "Qwen 3.8 27B on Cerebras"},
     "gpu": {"provider": "blinkvllm", "model": "qwen-27b", "label": "Qwen3.8-27B fine-tune on GPU (vLLM)"},
 }
-ACTIONS = {"site_estop", "site_alert", "robot_dispatch"}
+ACTIONS = {"site_estop", "site_alert", "robot_dispatch", "fleet_dispatch"}
 """The tool calls that act on the hazard: the first one's request ends L."""
 EVENT_PROMPT = "EVENT {}"
 EVENT_CAMERA = "chase"
-"""The camera whose frame, taken when the event arrives, rides in the event prompt (the CCTV up the aisle)."""
+"""The camera whose frame, taken when the event arrives, rides in the event prompt when the event names none (the CCTV
+up the aisle)."""
 WARMUP = "Warm-up, no hazard: answer only OK."
 RETRY_DELAYS = (0.5, 1.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0)
 """The tap's waits (s) before each resend of a refused (HTTP 429) model request: 8 resends, at most 3 s apart.
@@ -316,15 +317,15 @@ def gateway_token():
     return token
 
 
-def ask(brain, prompt, session=None, jpeg_b64=None):
+def ask(brain, prompt, session=None, jpegs=()):
     """One agent turn over the gateway's chat completions endpoint, streamed: in OpenClaw session `session` (the
-    endpoint's `user`; None: a fresh session), with the JPEG attached when given."""
+    endpoint's `user`; None: a fresh session), with the base64 JPEGs attached."""
     up = urlsplit(GATEWAY)
     conn = http.client.HTTPConnection(up.netloc, timeout=600)
     content = prompt
-    if jpeg_b64 is not None:
-        image = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{jpeg_b64}"}}
-        content = [{"type": "text", "text": prompt}, image]
+    if jpegs:
+        images = [{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{j}"}} for j in jpegs]
+        content = [{"type": "text", "text": prompt}, *images]
     msg = {"model": "openclaw/blink", "stream": True, "messages": [{"role": "user", "content": content}]}
     if session is not None:
         msg["user"] = session
@@ -415,7 +416,9 @@ def openclaw_target(*target):
 
 
 def verdict(outcome):
-    """SIM_PROTOCOL.md's run verdict from the outcome message: hit or saved."""
+    """SIM_PROTOCOL.md's run verdict from the outcome message: hit or saved; a search's found or not found."""
+    if "found" in outcome:
+        return "found" if outcome["found"] else "not found"
     people = outcome["people"].values()
     hit = any(p["hit"] for p in people) if people else outcome["collision"]
     return "hit" if hit else "saved"
@@ -504,17 +507,23 @@ def warm(brain, session):
     return turn
 
 
-def event_frame(relay, event, t_recv, offset):
-    """EVENT_CAMERA's frame asked for as the event arrives: (its base64 JPEG or None, its record)."""
-    rid = relay.send({"op": "site_camera", "name": EVENT_CAMERA})
-    t, reply = relay.wait(10.0, id=rid)
-    info = {"camera": EVENT_CAMERA, "t_sim": (reply or {}).get("t_sim"), "error": (reply or {}).get("error")}
-    info["received_s"] = None if t is None else round(t - (event["t_wall_ns"] / 1e9 + offset), 4)
-    info["after_recv_s"] = None if t is None else round(t - t_recv, 4)
-    jpeg = (reply or {}).get("jpeg_b64")
-    if jpeg is None:
-        print(f"drive.py: no {EVENT_CAMERA} frame for the event ({info}); the prompt goes without it", flush=True)
-    return jpeg, info
+def event_frames(relay, event, t_recv, offset):
+    """The frames of the cameras the event names (`frames`, else EVENT_CAMERA), all asked for as the event arrives:
+    [(base64 JPEG, its record)] of those that came."""
+    cameras = event.get("frames") or [EVENT_CAMERA]
+    rids = [(name, relay.send({"op": "site_camera", "name": name})) for name in cameras]
+    out = []
+    for name, rid in rids:
+        t, reply = relay.wait(20.0, id=rid)
+        info = {"camera": name, "t_sim": (reply or {}).get("t_sim"), "error": (reply or {}).get("error")}
+        info["received_s"] = None if t is None else round(t - (event["t_wall_ns"] / 1e9 + offset), 4)
+        info["after_recv_s"] = None if t is None else round(t - t_recv, 4)
+        jpeg = (reply or {}).get("jpeg_b64")
+        if jpeg is None:
+            print(f"drive.py: no {name} frame for the event ({info}); the prompt goes without it", flush=True)
+            continue
+        out.append((jpeg, info))
+    return out
 
 
 def keep_frame(jpeg, info, event, log_path):
@@ -586,21 +595,22 @@ def main():
             sys.exit("drive.py: no event")
         if t_recv < warmup["t_done"]:
             sys.exit("drive.py: the event came before the warm-up turn ended, so L would include the warm-up")
-        jpeg, frame = event_frame(relay, event, t_recv, offset)
+        frames = event_frames(relay, event, t_recv, offset)
         calls_from = len(Tap.calls)
         payload = {k: v for k, v in event.items() if k not in {"type", "t_wall_ns"}}
-        turn = ask(args.brain, EVENT_PROMPT.format(json.dumps(payload, separators=(",", ":"))), session, jpeg)
-        turn["calls_from"], turn["frame"] = calls_from, frame
-        if jpeg is not None:
-            keep_frame(jpeg, frame, event, log_path)
+        prompt = EVENT_PROMPT.format(json.dumps(payload, separators=(",", ":")))
+        turn = ask(args.brain, prompt, session, [jpeg for jpeg, _ in frames])
+        turn["calls_from"], turn["frames"] = calls_from, [info for _, info in frames]
+        for jpeg, info in frames:
+            keep_frame(jpeg, info, event, log_path)
         turns.append((turn, event, t_recv))
         print(
-            f"event {i}: frame {frame}, turn {turn['t_done'] - t_recv:.2f} s, error {turn['error']}, "
+            f"event {i}: frames {turn['frames']}, turn {turn['t_done'] - t_recv:.2f} s, error {turn['error']}, "
             f"text {turn['text'][:160]!r}",
             flush=True,
         )
     if args.mode == "live":
-        _, outcome = relay.wait(120.0, type="outcome")
+        _, outcome = relay.wait(300.0, type="outcome")
     time.sleep(0.5)
     tools = remote_lines(log_path, start_ns)
     for turn, event, t_recv in turns:

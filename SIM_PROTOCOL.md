@@ -24,10 +24,13 @@ messages and point `robot_mcp` at the socket (`BLINK_HOST`, `BLINK_PORT`).
   clock.
 
 ## The site
-One vehicle (`vehicles[0]`, e.g. `forklift`) drives a fixed sim-time schedule. People stand where the scenario puts
-them; an alerted person starts, `reaction_s` after the alert, toward a safe point at walking speed. A robot stands
-by and walks to a point when dispatched. A person is hit when the vehicle's collider footprint reaches his disc: the
-verdict is geometric, from the two schedules, judged every physics step. Poses are world frame (x, y m; yaw rad).
+A site is a hazard or a search. In a hazard, one vehicle (`vehicles[0]`, e.g. `forklift`) drives a fixed sim-time
+schedule. People stand where the scenario puts them; an alerted person starts, `reaction_s` after the alert, toward a
+safe point at walking speed. A person is hit when the vehicle's collider footprint reaches his disc: the verdict is
+geometric, from the two schedules, judged every physics step. In a search, a person lies somewhere on the site, his
+position unknown to the brain until he is found: a robot finds him at the first policy step at which its base is
+within `find_radius_m` of him (geometric, on the true poses). One or more robots (a fleet) stand by; each walks a
+route of waypoints when dispatched, then holds. Poses are world frame (x, y m; yaw rad).
 
 ## Messages
 Sim to client (unsolicited):
@@ -37,27 +40,42 @@ Sim to client (unsolicited):
   deadlines are the last sim time at which an alert alone, or an e-stop alone, still keeps the vehicle off him (from
   the same schedules and geometry, on the 5 ms physics grid), and `deadline_t_sim` the later of the two (null: that
   action cannot save him). `state` is the `site_get_state` reply at that instant.
+- `{"type":"event","t_sim":40.0,"t_wall_ns":...,"alarm":"Man-down alarm: ...","person":"worker1","find_radius_m":3.0,"search_s":150.0,"frames":["chase","cctv_north","cctv_south"],"state":{...}}`:
+  a search's alarm at the scenario's `t_alarm`. `frames` names the cameras whose frames the brain's driver attaches to
+  the alarm (drive.py asks site_camera for each as the event arrives).
 - `{"type":"outcome","t_sim":...,"collision":bool,"t_contact":...,"min_gap_m":...,"max_force_n":...,"people":{"worker1":{"hit":bool,"t_contact":...|null,"min_gap_m":...}}}`
   once the vehicle has stopped: the robot's physical contact verdict, and each person's geometric one. The run's
   verdict is `hit` when any person is hit, else `saved`; in a scenario with no people, `hit` when the robot collided.
+- `{"type":"outcome","t_sim":...,"found":bool,"found_by":"anymal13","t_found":...,"search_s":...,"people":{"worker1":{"found":bool,"t_found":...}},"fleet":{"dispatched_t_sim","first_moving_t_sim","last_moving_t_sim","robots_moving","robots"}}`:
+  a search's outcome, at the find or `search_s` after the alarm: the verdict is `found` or `not found`. `fleet` says
+  when the first dispatch applied and when the first and the last dispatched robot reached 0.3 m/s.
 
 Client to sim (requests, each with `id`, `op`, `t_wall_ns`) and replies (each with `late_s`):
-- `site_get_state` -> `{"t_sim", "vehicles": [{"id","x","y","yaw","speed_mps","reversing","estop","estop_available","stops_at_t_sim"}], "people": [{"id","x","y","yaw","speed_mps","time_to_contact_s","alert_deadline_s","estop_deadline_s","reaction_s","alerted","safe"}], "robot": {"id","x","y","yaw","vx","vy","time_to_contact_s"}}`.
+- `site_get_state` -> `{"t_sim", "vehicles": [{"id","x","y","yaw","speed_mps","reversing","estop","estop_available","stops_at_t_sim"}], "people": [{"id","x","y","yaw","speed_mps","time_to_contact_s","alert_deadline_s","estop_deadline_s","reaction_s","alerted","safe"}], "robots": [{"id","x","y","yaw","vx","vy","waypoints_left","time_to_contact_s"}], "cameras": [...], "map": {...}}`.
   Contact times and deadlines (seconds from now) are recomputed from the schedules as they are now (after any e-stop
-  or alert); null: none predicted, or that action can no longer save the person, or it has been used.
-- `site_camera`, `name`: `chase` (a fixed CCTV view) or `front` (the robot's) -> `{"t_sim","camera","jpeg_b64"}`, 640x360
-  JPEG, rendered at that step on request (no periodic rendering).
+  or alert); null: none predicted, or that action can no longer save the person, or it has been used. In a search
+  `vehicles` is empty, a robot has no `time_to_contact_s`, and a person is `{"id","status":"missing"}` until found,
+  then `{"id","status":"found","x","y","found_by","found_t_sim"}`. `map` is the scenario's site map as written
+  (lanes, panel blocks, `geofence` polygon, robot speed), absent when the scenario has none.
+- `site_camera`, `name`: one of the state's `cameras`: `chase` (a fixed CCTV view), the scenario's other fixed site
+  cameras, and each robot's own camera (`front` for a single robot, else the robot's id) -> `{"t_sim","camera","jpeg_b64"}`,
+  640x360 JPEG, rendered at that step on request (no periodic rendering).
 - `site_estop`, `vehicle` -> `{"vehicle","applied_at_t_sim","stops_at_t_sim"}`: the site's safety network brakes the
   vehicle at the scenario's e-stop deceleration from the mapped sim time. Unknown vehicle, or one without a networked
   e-stop: error.
 - `site_alert`, `person`, `message` -> `{"person","applied_at_t_sim","reaction_s","moves_at_t_sim"}`: the person's
   wearable alert. The first alert counts; a repeat returns the first one's times. The message is logged.
 - `robot_dispatch`, `robot`, `x`, `y` -> `{"robot","applied_at_t_sim","target"}`: the robot's own follower walks it
-  there, then it holds.
+  there, then it holds facing the way it walked.
+- `fleet_dispatch`, `routes`: `[{"robot", "waypoints": [[x, y], ...]}]` -> `{"applied_at_t_sim","dispatched":[ids],"errors":{id: text}}`:
+  every route applied at the same step; each robot's follower walks its waypoints in order, then it holds. A route
+  with an unknown robot, no waypoints or a waypoint outside the map's `geofence` is refused (in `errors`, absent when
+  none); the others still apply.
 - `incident_report`, `text` -> `{"logged_at_t_sim"}`: a `{"type":"incident_report","t_sim","text"}` line in the
   sim's log. Nothing leaves the sim.
 
 ## Logged by the sim (for the film and the audit)
 `blink_log.jsonl` in the run dir: every message in and out with `t_sim` and wall time, the mapped `t_target`,
-`late_s`, the command applied, and the incident reports. `scenario.jsonl`: the vehicle, robot and people poses at
+`late_s`, the command applied, the incident reports, a `robot_moving` line when a dispatched robot first reaches
+0.3 m/s and a `person_found` line at a search's find. `scenario.jsonl`: the vehicle, robot and people poses at
 `odom_hz` and one line per site event (`car_go`, `site_estop`, `site_alert`, `person_contact`, `car_stopped`).
