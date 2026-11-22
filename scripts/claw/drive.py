@@ -80,7 +80,7 @@ EVENT_CAMERA = "chase"
 up the aisle)."""
 WARMUP = "Warm-up, no hazard: answer only OK."
 RETRY_DELAYS = (0.5, 1.0, 2.0, *(3.0,) * 21)
-"""The tap's waits (s) before each resend of a refused (HTTP 429) model request: 24 resends, at most 3 s apart (68.5 s;
+"""The tap's waits (s) before each resend of a refused (HTTP 429) model request: 24 resends, at most 3 s apart (66.5 s;
 Cerebras refused every call for minutes at a time on 2026-11-22 10:45 EET).
 OpenClaw's own backoff (1 s doubling to 30 s) sees a refusal only once these are spent."""
 

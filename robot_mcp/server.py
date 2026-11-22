@@ -91,7 +91,7 @@ def serve(link):
 
     @mcp.tool(structured_output=False)
     async def site_get_state() -> str:
-        """Site now (world frame, m, s): vehicles, people, robot, each with time_to_contact_s (null: none predicted)."""
+        """Site now (world frame, m, s): vehicles, people, robots, each with time_to_contact_s (null: none predicted)."""
         return json.dumps(await call("site_get_state"))
 
     @mcp.tool(structured_output=False)
