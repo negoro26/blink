@@ -68,9 +68,10 @@ Client to sim (requests, each with `id`, `op`, `t_wall_ns`) and replies (each wi
 - `robot_dispatch`, `robot`, `x`, `y` -> `{"robot","applied_at_t_sim","target"}`: the robot's own follower walks it
   there, then it holds facing the way it walked.
 - `fleet_dispatch`, `routes`: `[{"robot", "waypoints": [[x, y], ...]}]` -> `{"applied_at_t_sim","dispatched":[ids],"errors":{id: text}}`:
-  every route applied at the same step; each robot's follower walks its waypoints in order, then it holds. A route
-  with an unknown robot, no waypoints or a waypoint outside the map's `geofence` is refused (in `errors`, absent when
-  none); the others still apply.
+  every route applied at the same step; each robot's follower walks its waypoints in order, then it holds. Every route
+  is checked before any applies: one with an unknown or missing robot, missing or no waypoints, a waypoint that is
+  not an `[x, y]` pair or a waypoint outside the map's `geofence` is refused (in `errors` under its robot id, or
+  `routes[i]` without one; absent when none); the others still apply.
 - `incident_report`, `text` -> `{"logged_at_t_sim"}`: a `{"type":"incident_report","t_sim","text"}` line in the
   sim's log. Nothing leaves the sim.
 
