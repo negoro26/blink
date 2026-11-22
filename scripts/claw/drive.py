@@ -32,8 +32,8 @@ gpu-host's clock. Tap times are this laptop's, shifted onto gpu-host's by an off
 Writes demo/results/<run>.json: compose_split.sh's keys (run, model, reaction_ms, tokens_per_s, outcome), the event,
 the outcome, every tool call, every model call with its token stream, the event frame (kept byte for byte as
 camera/<event t_wall_ns>-<camera>-event.jpg beside the MCP log) and the agent's final text. A refused model call stays
-in the list with its status and error; an episode's retry_s sums the time from each refused request to the next
-request, so L splits into retries, queue and decode.
+in the list with its status and error; an episode's retry_s sums the time from each refused request before the deciding
+call to the next request, so L splits into retries, queue and decode (refusals after the decision are counted, not timed).
 """
 
 import argparse
@@ -430,6 +430,7 @@ def episode(brain, event, t_recv, calls_from, tools, offset):
     calls = Tap.calls[calls_from:]
     llm = next((c for c in calls if c["status"] == 200), None)
     refused = [(c, nxt) for c, nxt in zip(calls, [*calls[1:], None], strict=True) if c["status"] != 200]
+    before = [(c, nxt) for c, nxt in refused if llm is None or c["t_req"] < llm["t_req"]]
     usage = (llm or {}).get("usage") or {}
     gen = (llm["t_end"] - llm["t_first_token"]) if llm and llm["t_first_token"] else None
     ev_local = ev_ns / 1e9 + offset
@@ -465,7 +466,8 @@ def episode(brain, event, t_recv, calls_from, tools, offset):
         "said": (llm or {}).get("content"),
         "model_calls": len(calls),
         "refused_calls": len(refused),
-        "retry_s": round(sum((nxt or c)["t_req"] - c["t_req"] for c, nxt in refused), 4),
+        "refused_before_decision": len(before),
+        "retry_s": round(sum((nxt or c)["t_req"] - c["t_req"] for c, nxt in before), 4),
     }
 
 

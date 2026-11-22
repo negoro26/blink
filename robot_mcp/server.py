@@ -69,7 +69,7 @@ class Link:
             self.frames.mkdir(exist_ok=True)
             jpeg = self.frames / f"{wall_out}-{args.get('name', 'camera')}.jpg"
             jpeg.write_bytes(base64.b64decode(reply["jpeg_b64"]))
-            record["jpeg"] = str(jpeg)
+            record["jpeg"] = str(jpeg.relative_to(self.frames.parent))
         self.log.write(json.dumps({**record, "reply": logged, "wall_ns_out": wall_out}) + "\n")
         return reply
 
