@@ -13,7 +13,7 @@ OpenClaw's models.providers point at it; scripts/claw/openclaw.sh setup writes t
 with the effort set and stream usage on, streams the answer back as it arrives, and records every streamed piece
 (reasoning, text, tool call name and arguments) with its wall time, and the call's usage. Authorization passes
 through and is never recorded. A request the provider refuses (HTTP 429) the tap sends again itself, after each of
-RETRY_DELAYS (8 resends, at most 3 s apart); OpenClaw's own backoff doubles from 1 s to 30 s.
+RETRY_DELAYS (24 resends, at most 3 s apart); OpenClaw's own backoff doubles from 1 s to 30 s.
 
 The sim side is one protocol connection (robot_mcp.sim relay through scripts/claw/box_cmd.sh): the event and the
 outcome arrive on it. `gate` runs robot_mcp.replay on gpu-host with --event (a recorded sim event) and fires it
@@ -79,8 +79,9 @@ EVENT_CAMERA = "chase"
 """The camera whose frame, taken when the event arrives, rides in the event prompt when the event names none (the CCTV
 up the aisle)."""
 WARMUP = "Warm-up, no hazard: answer only OK."
-RETRY_DELAYS = (0.5, 1.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0)
-"""The tap's waits (s) before each resend of a refused (HTTP 429) model request: 8 resends, at most 3 s apart.
+RETRY_DELAYS = (0.5, 1.0, 2.0, *(3.0,) * 21)
+"""The tap's waits (s) before each resend of a refused (HTTP 429) model request: 24 resends, at most 3 s apart (68.5 s;
+Cerebras refused every call for minutes at a time on 2026-11-22 10:45 EET).
 OpenClaw's own backoff (1 s doubling to 30 s) sees a refusal only once these are spent."""
 
 
