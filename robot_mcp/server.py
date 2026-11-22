@@ -1,11 +1,12 @@
-"""Blink's MCP server: seven tools over stdio, each a thin client of the sim protocol (SIM_PROTOCOL.md, robot_mcp/sim.py).
+"""Blink's MCP server: six tools over stdio, each a thin client of the sim protocol (SIM_PROTOCOL.md, robot_mcp/sim.py).
 
     python -m robot_mcp.server      # on the sim's host, in its network (scripts/claw/box_cmd.sh enters a session's box)
 
 Each tool is the protocol op of its name: site_get_state (vehicles, people, robots, cameras, map),
 site_camera (one named camera's frame, rendered on request), site_estop (the site's safety network brakes a vehicle),
-site_alert (a person's wearable alert), robot_dispatch (a robot walks to a world point), fleet_dispatch (many robots
-at once, each along its own waypoints), incident_report (the incident, into the sim's log).
+site_alert (a person's wearable alert), fleet_dispatch (one or many robots walk, each along its own waypoints),
+incident_report (the incident, into the sim's log). The protocol's robot_dispatch (one robot, one point) has no tool:
+fleet_dispatch with one route does it.
 
 The same server drives any sim that serves the protocol (the Kit-less runner, the Kit scene) on $BLINK_HOST:$BLINK_PORT.
 Every call is one JSON line in $ROBOT_MCP_LOG (default $BOX_RUN/mcp.jsonl, else ./mcp.jsonl): the tool, its
@@ -30,10 +31,10 @@ from .sim import Sim
 
 
 class Route(TypedDict):
-    """One robot's route for fleet_dispatch."""
+    """A robot and its waypoints."""
 
     robot: str
-    waypoints: list[tuple[float, float]]
+    waypoints: list[list[float]]
 
 
 class Link:
@@ -82,7 +83,7 @@ class Link:
 
 
 def serve(link):
-    """Register the seven tools and serve stdio until stdin closes."""
+    """Register the six tools and serve stdio until stdin closes."""
     mcp = MCPServer("robot")
 
     async def call(op, **args):
@@ -95,8 +96,7 @@ def serve(link):
 
     @mcp.tool(structured_output=False)
     async def site_camera(name: str) -> Image | str:
-        """A camera's view now, by a name in site_get_state's cameras: chase (the site's CCTV), front or a robot id
-        (that robot's own camera)."""
+        """A camera's view now: a name from site_get_state's cameras (chase: CCTV; a robot id or front: its own)."""
         reply = await call("site_camera", name=name)
         if "jpeg_b64" not in reply:
             return json.dumps(reply)
@@ -113,13 +113,8 @@ def serve(link):
         return json.dumps(await call("site_alert", person=person, message=message))
 
     @mcp.tool(structured_output=False)
-    async def robot_dispatch(robot: str, x: float, y: float) -> str:
-        """Send a robot to walk to world (x, y)."""
-        return json.dumps(await call("robot_dispatch", robot=robot, x=x, y=y))
-
-    @mcp.tool(structured_output=False)
     async def fleet_dispatch(routes: list[Route]) -> str:
-        """Send many robots at once, each along its own waypoints [[x, y], ...] (world m), in one call."""
+        """Send robots walking, each along its own waypoints [[x, y], ...] (world m)."""
         return json.dumps(await call("fleet_dispatch", routes=routes))
 
     @mcp.tool(structured_output=False)

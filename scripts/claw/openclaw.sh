@@ -7,7 +7,7 @@ usage="usage: openclaw.sh setup | gateway | target <session-name> | target --rep
            earlier go2 entries: the agent blink (workspace ~/.openclaw/workspace-blink holding only
            robot_mcp/openclaw/AGENTS.md, no skills, thinking high in OpenClaw so the Control UI shows the reasoning
            stream (drive.py's tap still sets each run's reasoning setting on the wire); tools: the minimal profile
-           plus the MCP server robot's seven site tools), the MCP server
+           plus the MCP server robot's six site tools), the MCP server
            robot (scripts/claw/box_cmd.sh with no arguments: its target file says which sim), the providers
            blinkcerebras (Cerebras, key from CEREBRAS_API_KEY: Kimi K3.1 Pro and Qwen 3.8 27B) and blinkvllm
            (a self-hosted vLLM on gpu-host), both through scripts/claw/drive.py's timing tap on 127.0.0.1:18790,
